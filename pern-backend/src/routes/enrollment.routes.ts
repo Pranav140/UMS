@@ -237,6 +237,36 @@ router.get('/my-sections', authenticate, authorize(['FACULTY']), async (req: Req
   res.json({ sections: profile.sectionsTeaching });
 });
 
+// GET /section/:sectionId — enrolled students for a section (faculty/admin)
+router.get('/section/:sectionId', authenticate, authorize(['FACULTY', 'ADMIN', 'DEVELOPER']), async (req: Request, res: Response) => {
+  const sectionId = req.params.sectionId as string;
+
+  // Faculty may only access their own sections
+  if (req.user!.role === 'FACULTY') {
+    const profile = await prisma.facultyProfile.findUnique({ where: { userId: req.user!.id } });
+    const section = await prisma.section.findUnique({ where: { id: sectionId } });
+    if (!section) {
+      res.status(404).json({ error: 'Section not found' });
+      return;
+    }
+    if (section.facultyId !== profile?.id) {
+      res.status(403).json({ error: 'You are not assigned to this section' });
+      return;
+    }
+  }
+
+  const enrollments = await prisma.enrollment.findMany({
+    where: { sectionId, status: 'ENROLLED' },
+    include: {
+      student: { select: { id: true, name: true, email: true, studentProfile: true } },
+      section: { include: { course: true, semester: true } },
+    },
+    orderBy: { student: { name: 'asc' } },
+  });
+
+  res.json({ enrollments });
+});
+
 // GET /all — all enrollments (admin)
 router.get('/all', authenticate, authorize(['ADMIN', 'DEVELOPER']), async (req: Request, res: Response) => {
   const { semesterId, courseId, status } = req.query as any;

@@ -194,6 +194,9 @@ export const enrollmentApi = {
 
   all: (params?: { semesterId?: string; courseId?: string; status?: string }): Promise<Enrollment[]> =>
     api.get('/enrollment/all', { params }).then((r) => r.data.enrollments),
+
+  bySection: (sectionId: string): Promise<Enrollment[]> =>
+    api.get(`/enrollment/section/${sectionId}`).then((r) => r.data.enrollments),
 };
 
 // ─── Academic ─────────────────────────────────────────────────────────────────

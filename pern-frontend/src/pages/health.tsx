@@ -18,6 +18,8 @@ export default function HealthPage() {
   });
 
   const isOk = !isError && data?.status === 'OK';
+  const dbUp = data?.services?.database ?? isOk;
+  const apiUp = !isError && !!data;
 
   if (!isAdmin()) {
     return <div className="py-20 text-center text-gray-500 dark:text-gray-500">Access restricted to administrators.</div>;
@@ -55,10 +57,11 @@ export default function HealthPage() {
           </div>
           <div>
             <p className="text-[18px] font-bold text-gray-900 dark:text-white">
-              {isLoading ? 'Checking…' : isOk ? 'All Systems Operational' : 'Service Degraded'}
+              {isLoading ? 'Checking…' : isOk ? 'All Systems Operational' : data?.status === 'DEGRADED' ? 'Service Degraded' : 'Service Unavailable'}
             </p>
             <p className="text-[13px] text-gray-500 dark:text-gray-500 mt-0.5">
               Last checked: {dataUpdatedAt ? formatDate(new Date(dataUpdatedAt), 'HH:mm:ss') : '—'}
+              {data?.timestamp && <span className="ml-2 font-mono opacity-60">· server: {formatDate(data.timestamp, 'HH:mm:ss')}</span>}
             </p>
           </div>
           <div className="ml-auto">
@@ -76,10 +79,9 @@ export default function HealthPage() {
         <h3 className="text-[15px] font-semibold text-gray-900 dark:text-white mb-4">Services</h3>
         <ul className="space-y-3">
           {[
-            { name: 'API Server', description: 'Express · port 8080', status: isOk, always: true },
-            { name: 'Database', description: 'PostgreSQL 16', status: isOk, always: true },
-            { name: 'Cache', description: 'Redis 7', status: isOk, always: true },
-            { name: 'Object Storage', description: 'MinIO (S3-compatible)', status: isOk, always: true },
+            { name: 'API Server', description: 'Express · port 8080', status: apiUp },
+            { name: 'Database', description: 'PostgreSQL 16', status: dbUp },
+            { name: 'Object Storage', description: 'MinIO (S3-compatible) · port 9000', status: isOk },
           ].map((svc) => (
             <li key={svc.name} className="flex items-center gap-3 py-2 border-b border-black/[0.04] dark:border-white/[0.05] last:border-0">
               <div className={`w-2 h-2 rounded-full shrink-0 ${isLoading ? 'bg-gray-300 animate-pulse-soft' : svc.status ? 'bg-emerald-500' : 'bg-red-500'}`} />

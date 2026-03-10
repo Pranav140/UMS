@@ -190,34 +190,40 @@ function StudentDashboard() {
 
 // ─── Faculty Dashboard ────────────────────────────────────────────────────────
 function FacultyDashboard() {
-  const { data: sections, isLoading } = useQuery({
+  const { data: sections = [], isLoading } = useQuery({
     queryKey: ['my-sections'],
     queryFn: enrollmentApi.mySections,
   });
+
+  const totalStudents = (sections as Section[]).reduce((s, sec) => s + (sec._count?.enrollments ?? 0), 0);
+  const uniqueCourses = new Set((sections as Section[]).map((s) => s.courseId)).size;
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
           title="Assigned Sections"
-          value={isLoading ? '—' : (sections ?? []).length}
+          value={isLoading ? '—' : (sections as Section[]).length}
           icon={<Layers size={20} />}
           iconColor="bg-purple-500/10 text-purple-600 dark:text-purple-400"
           loading={isLoading}
+          subtitle="this semester"
         />
         <StatCard
           title="Total Students"
-          value={isLoading ? '—' : (sections ?? []).reduce((s: number, sec: Section) => s + (sec._count?.enrollments ?? 0), 0)}
+          value={isLoading ? '—' : totalStudents}
           icon={<GraduationCap size={20} />}
           iconColor="bg-blue-500/10 text-blue-600 dark:text-blue-400"
           loading={isLoading}
+          subtitle="across all sections"
         />
         <StatCard
           title="Active Courses"
-          value={isLoading ? '—' : new Set((sections ?? []).map((s: Section) => s.courseId)).size}
+          value={isLoading ? '—' : uniqueCourses}
           icon={<BookOpen size={20} />}
           iconColor="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
           loading={isLoading}
+          subtitle="unique courses"
         />
       </div>
 
@@ -226,22 +232,33 @@ function FacultyDashboard() {
           <h3 className="text-[15px] font-semibold text-gray-900 dark:text-white">My Sections</h3>
           <Link to="/dashboard/my-sections" className="text-[12px] text-[#0071E3] dark:text-[#0A84FF] hover:underline font-medium">View all →</Link>
         </div>
-        {isLoading ? <SkeletonList count={4} /> : (sections ?? []).length === 0 ? (
-          <EmptyState text="No sections assigned yet" />
+        {isLoading ? <SkeletonList count={4} /> : (sections as Section[]).length === 0 ? (
+          <EmptyState text="No sections assigned yet — claim a section from My Sections" />
         ) : (
-          <ul className="space-y-2">
-            {(sections ?? []).map((s: Section) => (
-              <li key={s.id} className="flex items-center gap-3 py-2.5 border-b border-black/[0.04] dark:border-white/[0.05] last:border-0">
-                <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
-                  <BookOpen size={15} className="text-purple-600 dark:text-purple-400" />
+          <ul className="space-y-3">
+            {(sections as Section[]).map((s) => (
+              <li key={s.id} className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.04] dark:border-white/[0.05]">
+                <div className="flex items-center gap-3 mb-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
+                    <BookOpen size={15} className="text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-medium text-gray-900 dark:text-white truncate">{s.course?.title ?? '—'}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-500">{s.course?.code} · {s._count?.enrollments ?? 0}/{s.capacity} students</p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-medium text-gray-900 dark:text-white truncate">{s.course?.title ?? '—'}</p>
-                  <p className="text-[11px] text-gray-500 dark:text-gray-500">{s.course?.code} · {s._count?.enrollments ?? 0}/{s.capacity} students</p>
+                <div className="flex gap-2">
+                  <Link to={`/dashboard/attendance?section=${s.id}`} className="flex-1">
+                    <button className="w-full flex items-center justify-center gap-1.5 h-8 px-3 rounded-lg bg-[#0071E3]/10 dark:bg-[#0A84FF]/10 text-[#0071E3] dark:text-[#0A84FF] text-[12px] font-medium hover:bg-[#0071E3]/20 dark:hover:bg-[#0A84FF]/20 transition-colors">
+                      <ClipboardList size={13} />Mark Attendance
+                    </button>
+                  </Link>
+                  <Link to={`/dashboard/grades?section=${s.id}`} className="flex-1">
+                    <button className="w-full flex items-center justify-center gap-1.5 h-8 px-3 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[12px] font-medium hover:bg-amber-500/20 transition-colors">
+                      <BarChart2 size={13} />Enter Grades
+                    </button>
+                  </Link>
                 </div>
-                <Link to={`/dashboard/attendance?section=${s.id}`} className="text-[12px] text-[#0071E3] dark:text-[#0A84FF] font-medium hover:underline whitespace-nowrap">
-                  Mark
-                </Link>
               </li>
             ))}
           </ul>

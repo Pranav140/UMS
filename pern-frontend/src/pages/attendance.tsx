@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { academicApi, enrollmentApi } from '@/lib/api';
@@ -77,7 +77,7 @@ function FacultyAttendance() {
   const qc = useQueryClient();
 
   const { data: sections = [] } = useQuery({
-    queryKey: isFaculty() ? ['my-sections'] : ['all-enrollments'],
+    queryKey: isFaculty() ? ['my-sections'] : ['all-enrollments-admin'],
     queryFn: () => (isFaculty() ? enrollmentApi.mySections() : enrollmentApi.all()) as Promise<unknown[]>,
   });
 
@@ -87,6 +87,13 @@ function FacultyAttendance() {
 
   const [selectedSection, setSelectedSection] = useState(defaultSection || (sectionList[0]?.id ?? ''));
   const [showMark, setShowMark] = useState(false);
+
+  // Auto-select first section once sections have loaded
+  useEffect(() => {
+    if (!selectedSection && sectionList.length > 0) {
+      setSelectedSection(sectionList[0].id);
+    }
+  }, [sectionList, selectedSection]);
 
   const { data: attendanceData, isLoading } = useQuery({
     queryKey: ['attendance-section', selectedSection],
@@ -156,11 +163,11 @@ function MarkAttendanceModal({ open, onClose, sectionId }: { open: boolean; onCl
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [attendance, setAttendance] = useState<Record<string, boolean>>({});
 
-  // Use enrollment list from different endpoint
+  // Use dedicated section enrollment endpoint (accessible to faculty)
   const { data: enrollmentList = [] } = useQuery({
-    queryKey: ['enrollment-all'],
-    queryFn: () => enrollmentApi.all().then((all: Enrollment[]) => all.filter((e) => e.sectionId === sectionId && e.status === 'ENROLLED')),
-    enabled: open,
+    queryKey: ['enrollment-section', sectionId],
+    queryFn: () => enrollmentApi.bySection(sectionId),
+    enabled: open && !!sectionId,
   });
 
   const bulkMutation = useMutation({
@@ -170,7 +177,7 @@ function MarkAttendanceModal({ open, onClose, sectionId }: { open: boolean; onCl
     onError: (e) => toast.error(getErrorMessage(e)),
   });
 
-  const toggle = (id: string) => setAttendance((p) => ({ ...p, [id]: !p[id] }));
+  const toggle = (id: string) => setAttendance((p) => ({ ...p, [id]: !(p[id] ?? true) }));
 
   const submit = () => {
     const attendances = (enrollmentList as Enrollment[]).map((e) => ({

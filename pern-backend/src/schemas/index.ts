@@ -87,13 +87,13 @@ export const SectionIdPayloadSchema = z.object({
 export const AttendanceSchema = z.object({
   sectionId: z.string().uuid(),
   studentId: z.string().uuid(),
-  date: z.string().datetime(),
+  date: z.string().min(1),  // accepts YYYY-MM-DD or full ISO datetime
   isPresent: z.boolean(),
 });
 
 export const BulkAttendanceSchema = z.object({
   sectionId: z.string().uuid(),
-  date: z.string().datetime(),
+  date: z.string().min(1),  // accepts YYYY-MM-DD or full ISO datetime
   attendances: z
     .array(
       z.object({

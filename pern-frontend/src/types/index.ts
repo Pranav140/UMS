@@ -153,7 +153,11 @@ export interface ApiError {
 }
 
 export interface HealthResponse {
-  status: 'OK' | 'ERROR';
+  status: 'OK' | 'DEGRADED' | 'ERROR';
+  services?: {
+    api: boolean;
+    database: boolean;
+  };
   timestamp?: string;
 }
 

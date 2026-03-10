@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { academicApi, enrollmentApi } from '@/lib/api';
@@ -90,7 +90,7 @@ function FacultyGrades() {
   const qc = useQueryClient();
 
   const { data: sections = [] } = useQuery({
-    queryKey: ['my-sections'],
+    queryKey: isFaculty() ? ['my-sections'] : ['all-enrollments-admin'],
     queryFn: () => (isFaculty() ? enrollmentApi.mySections() : enrollmentApi.all()) as Promise<unknown[]>,
   });
 
@@ -100,6 +100,13 @@ function FacultyGrades() {
 
   const [selectedSection, setSelectedSection] = useState(defaultSection || (sectionList[0]?.id ?? ''));
   const [showBulk, setShowBulk] = useState(false);
+
+  // Auto-select first section once sections have loaded
+  useEffect(() => {
+    if (!selectedSection && sectionList.length > 0) {
+      setSelectedSection(sectionList[0].id);
+    }
+  }, [sectionList, selectedSection]);
 
   const { data: grades = [], isLoading } = useQuery({
     queryKey: ['grades-section', selectedSection],
@@ -154,31 +161,41 @@ function FacultyGrades() {
 function BulkGradeModal({ open, onClose, sectionId }: { open: boolean; onClose: () => void; sectionId: string }) {
   const qc = useQueryClient();
   const [grades, setGrades] = useState<Array<{ studentId: string; name: string; score: string; letter: string; status: string }>>([]);
-  const [loaded, setLoaded] = useState(false);
 
   const { data: enrollments = [] } = useQuery({
     queryKey: ['enrollment-section', sectionId],
-    queryFn: () => enrollmentApi.all().then((all: Enrollment[]) => all.filter((e) => e.sectionId === sectionId && e.status === 'ENROLLED')),
-    enabled: open,
+    queryFn: () => enrollmentApi.bySection(sectionId),
+    enabled: open && !!sectionId,
   });
 
-  if (open && !loaded && (enrollments as Enrollment[]).length > 0) {
-    setGrades((enrollments as Enrollment[]).map((e) => ({ studentId: e.studentId, name: e.student?.name ?? e.studentId.slice(0, 8), score: '', letter: 'B', status: 'DRAFT' })));
-    setLoaded(true);
-  }
+  // Initialize grade rows when enrollments load (or when modal re-opens)
+  useEffect(() => {
+    if (open && (enrollments as Enrollment[]).length > 0) {
+      setGrades((enrollments as Enrollment[]).map((e) => ({
+        studentId: e.studentId,
+        name: e.student?.name ?? e.studentId.slice(0, 8),
+        score: '',
+        letter: 'B',
+        status: 'DRAFT',
+      })));
+    }
+    if (!open) {
+      setGrades([]);
+    }
+  }, [open, enrollments]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: (payload: { sectionId: string; grades: Array<{ studentId: string; score: number; letter: string; status: string }> }) =>
       academicApi.bulkGrades(payload),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['grades-section', sectionId] }); toast.success('Grades saved'); onClose(); setLoaded(false); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['grades-section', sectionId] }); toast.success('Grades saved'); onClose(); },
     onError: (e) => toast.error(getErrorMessage(e)),
   });
 
   const update = (i: number, k: string, v: string) => setGrades((p) => p.map((g, idx) => idx === i ? { ...g, [k]: v } : g));
 
   return (
-    <Modal open={open} onClose={() => { onClose(); setLoaded(false); }} title="Bulk Grade Entry" size="xl"
-      footer={<><Button variant="secondary" size="sm" onClick={() => { onClose(); setLoaded(false); }}>Cancel</Button><Button size="sm" loading={isPending} onClick={() => mutate({ sectionId, grades: grades.map((g) => ({ studentId: g.studentId, score: Number(g.score) || 0, letter: g.letter, status: g.status })) })}>Save All Grades</Button></>}>
+    <Modal open={open} onClose={onClose} title="Bulk Grade Entry" size="xl"
+      footer={<><Button variant="secondary" size="sm" onClick={onClose}>Cancel</Button><Button size="sm" loading={isPending} onClick={() => mutate({ sectionId, grades: grades.map((g) => ({ studentId: g.studentId, score: Number(g.score) || 0, letter: g.letter, status: g.status })) })}>Save All Grades</Button></>}>
       {grades.length === 0 ? (
         <p className="text-center py-6 text-sm text-gray-400 dark:text-gray-600">No enrolled students found.</p>
       ) : (

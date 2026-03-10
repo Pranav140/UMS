@@ -1,21 +1,21 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Providers } from '@/providers/Providers';
 
-import LoginPage from '@/pages/LoginPage';
-import DashboardLayout from '@/pages/DashboardLayout';
-import DashboardPage from '@/pages/DashboardPage';
-import AttendancePage from '@/pages/AttendancePage';
-import CoursesPage from '@/pages/CoursesPage';
-import EnrollmentsPage from '@/pages/EnrollmentsPage';
-import GradesPage from '@/pages/GradesPage';
-import HealthPage from '@/pages/HealthPage';
-import MyCoursesPage from '@/pages/MyCoursesPage';
-import MySectionsPage from '@/pages/MySectionsPage';
-import ProfilePage from '@/pages/ProfilePage';
-import SectionsPage from '@/pages/SectionsPage';
-import SemestersPage from '@/pages/SemestersPage';
-import TranscriptPage from '@/pages/TranscriptPage';
-import UsersPage from '@/pages/UsersPage';
+import LoginPage from '@/pages/login';
+import DashboardLayout from '@/pages/dashboard-layout';
+import DashboardPage from '@/pages/dashboard';
+import AttendancePage from '@/pages/attendance';
+import CoursesPage from '@/pages/courses';
+import EnrollmentsPage from '@/pages/enrollments';
+import GradesPage from '@/pages/grades';
+import HealthPage from '@/pages/health';
+import MyCoursesPage from '@/pages/my-courses';
+import MySectionsPage from '@/pages/my-sections';
+import ProfilePage from '@/pages/profile';
+import SectionsPage from '@/pages/sections';
+import SemestersPage from '@/pages/semesters';
+import TranscriptPage from '@/pages/transcript';
+import UsersPage from '@/pages/users';
 
 export default function App() {
   return (

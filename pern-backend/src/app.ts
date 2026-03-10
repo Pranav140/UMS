@@ -8,6 +8,7 @@ import courseRoutes from './routes/course.routes';
 import enrollmentRoutes from './routes/enrollment.routes';
 import academicRoutes from './routes/academic.routes';
 import filesRoutes from './routes/files.routes';
+import prisma from './prisma';
 
 const app = express();
 
@@ -28,8 +29,24 @@ app.use('/api/v1/academic', academicRoutes);
 app.use('/api/v1/files', filesRoutes);
 
 // ── Health ────────────────────────────────────────────────────────
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'OK' });
+app.get('/api/health', async (_req, res) => {
+  let dbStatus = false;
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    dbStatus = true;
+  } catch {
+    // db unreachable
+  }
+
+  const status = dbStatus ? 'OK' : 'DEGRADED';
+  res.status(dbStatus ? 200 : 503).json({
+    status,
+    services: {
+      api: true,
+      database: dbStatus,
+    },
+    timestamp: new Date().toISOString(),
+  });
 });
 
 export default app;
