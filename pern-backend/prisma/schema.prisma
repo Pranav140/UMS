@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  FACULTY
+  ADMIN
+  DEVELOPER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions  Session[]
+  auditLogs AuditLog[]
+
+  studentProfile StudentProfile?
+  facultyProfile FacultyProfile?
+  enrollments    Enrollment[]
+  attendances    Attendance[]
+  grades         Grade[]
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  refreshToken String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// === Phase 2 ===
+
+model Course {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  title       String
+  description String?
+  credits     Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sections Section[]
+}
+
+model Semester {
+  id        String   @id @default(uuid())
+  name      String   // e.g. "Spring 2026"
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(false)
+  
+  sections Section[]
+}
+
+model Section {
+  id         String   @id @default(uuid())
+  courseId   String
+  semesterId String
+  capacity   Int
+  
+  course   Course   @relation(fields: [courseId], references: [id])
+  semester Semester @relation(fields: [semesterId], references: [id])
+  
+  facultyId String?
+  faculty   FacultyProfile? @relation(fields: [facultyId], references: [id])
+
+  enrollments Enrollment[]
+  attendances Attendance[]
+  grades      Grade[]
+}
+
+model StudentProfile {
+  id             String @id @default(uuid())
+  userId         String @unique
+  enrollmentYear Int
+  major          String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model FacultyProfile {
+  id         String @id @default(uuid())
+  userId     String @unique
+  department String
+  title      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sectionsTeaching Section[]
+}
+
+model Enrollment {
+  id        String   @id @default(uuid())
+  studentId String
+  sectionId String
+  status    String   @default("ENROLLED") // ENROLLED, DROPPED
+  createdAt DateTime @default(now())
+
+  student User    @relation(fields: [studentId], references: [id])
+  section Section @relation(fields: [sectionId], references: [id])
+
+  @@unique([studentId, sectionId])
+}
+
+model Attendance {
+  id        String   @id @default(uuid())
+  studentId String
+  sectionId String
+  date      DateTime
+  isPresent Boolean
+  createdAt DateTime @default(now())
+
+  student User    @relation(fields: [studentId], references: [id])
+  section Section @relation(fields: [sectionId], references: [id])
+
+  @@unique([studentId, sectionId, date])
+}
+
+model Grade {
+  id        String   @id @default(uuid())
+  studentId String
+  sectionId String
+  score     Float?
+  letter    String?  // A, B, C...
+  status    String   @default("DRAFT") // DRAFT, FINALIZED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student User    @relation(fields: [studentId], references: [id])
+  section Section @relation(fields: [sectionId], references: [id])
+
+  @@unique([studentId, sectionId])
+}

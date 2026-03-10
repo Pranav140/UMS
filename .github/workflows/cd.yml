@@ -1,0 +1,35 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches: [ "master", "main" ]
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Build and push Backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./pern-backend
+          push: true
+          tags: ghcr.io/${{ github.repository }}/pern-backend:latest
+          
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./pern-frontend
+          push: true
+          tags: ghcr.io/${{ github.repository }}/pern-frontend:latest
