@@ -140,11 +140,24 @@ router.post(
       });
 
       if (role === 'STUDENT' && profileData) {
+        // Validate degreeId if provided
+        if (profileData.degreeId) {
+          const degree = await prisma.degree.findUnique({
+            where: { id: profileData.degreeId },
+          });
+          if (!degree) {
+            await prisma.user.delete({ where: { id: user.id } });
+            res.status(400).json({ error: 'Invalid degree ID' });
+            return;
+          }
+        }
+
         await prisma.studentProfile.create({
           data: {
             userId: user.id,
             enrollmentYear: profileData.enrollmentYear || new Date().getFullYear(),
             major: profileData.major || 'Undeclared',
+            degreeId: profileData.degreeId || null,
           },
         });
       } else if (role === 'FACULTY' && profileData) {

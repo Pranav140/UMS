@@ -43,6 +43,12 @@ function StudentDashboard() {
   const { user } = useAuthStore();
   const studentId = user?.id ?? '';
 
+  const { data: profile, isLoading: loadingProfile } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: usersApi.me,
+    enabled: !!studentId,
+  });
+
   const { data: enrollments, isLoading: loadingEnrollments } = useQuery({
     queryKey: ['my-enrollments'],
     queryFn: enrollmentApi.myEnrollments,
@@ -73,11 +79,21 @@ function StudentDashboard() {
     ? Math.round(attendanceData.reduce((s: number, a: SectionAttendanceStats) => s + a.percentage, 0) / attendanceData.length)
     : 0;
   const finalizedGrades = (gradesData ?? []).filter((g: Grade) => g.status === 'FINALIZED');
+  const degreeName = profile?.studentProfile?.degree?.name ?? 'Not assigned';
+  const degreeCode = profile?.studentProfile?.degree?.code ?? 'N/A';
 
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <StatCard
+          title="Degree/Branch"
+          value={loadingProfile ? '—' : degreeCode}
+          icon={<GraduationCap size={20} />}
+          iconColor="bg-indigo-500/10 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+          loading={loadingProfile}
+          subtitle={loadingProfile ? 'loading...' : degreeName.length > 20 ? degreeName.substring(0, 20) + '...' : degreeName}
+        />
         <StatCard
           title="Enrolled Courses"
           value={loadingEnrollments ? '—' : activeEnrollments.length}

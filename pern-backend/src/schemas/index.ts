@@ -23,6 +23,7 @@ export const ProvisionUserSchema = z.object({
       major: z.string().min(1).optional(),
       department: z.string().min(1).optional(),
       title: z.string().min(1).optional(),
+      degreeId: z.string().uuid().optional(),
     })
     .optional(),
 });
@@ -56,6 +57,21 @@ export const UpdateCourseSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().optional(),
   credits: z.number().min(1).max(10).optional(),
+});
+
+// ── Degrees ───────────────────────────────────────────────────────
+export const CreateDegreeSchema = z.object({
+  code: z.string().min(1).max(10),
+  name: z.string().min(1),
+  isMajor: z.boolean(),
+  description: z.string().optional(),
+});
+
+export const UpdateDegreeSchema = z.object({
+  code: z.string().min(1).max(10).optional(),
+  name: z.string().min(1).optional(),
+  isMajor: z.boolean().optional(),
+  description: z.string().optional(),
 });
 
 // ── Semesters ─────────────────────────────────────────────────────
