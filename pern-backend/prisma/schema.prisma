@@ -125,11 +125,11 @@ model StudentProfile {
   id             String @id @default(uuid())
   userId         String @unique
   enrollmentYear Int
-  degreeId       String?
+  degreeId       String
   major          String  // Branch code (CSE, ECE, IT, etc.)
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  degree Degree? @relation(fields: [degreeId], references: [id], onDelete: SetNull)
+  degree Degree  @relation(fields: [degreeId], references: [id], onDelete: Restrict)
 }
 
 model FacultyProfile {

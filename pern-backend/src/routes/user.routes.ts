@@ -45,7 +45,11 @@ router.get('/me/profile', authenticate, async (req: Request, res: Response) => {
     user = await prisma.user.findUnique({
       where: { id: req.user!.id },
       include: {
-        studentProfile: true,
+        studentProfile: {
+          include: {
+            degree: true,
+          },
+        },
         enrollments: {
           include: {
             section: {
@@ -127,6 +131,12 @@ router.post(
     const { email, name, role, initialPassword, profileData } = req.body;
 
     try {
+      // Validate degreeId required for students
+      if (role === 'STUDENT' && !profileData?.degreeId) {
+        res.status(400).json({ error: 'Degree/Branch is required for students' });
+        return;
+      }
+
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
         res.status(400).json({ error: 'Email already exists' });
@@ -140,16 +150,14 @@ router.post(
       });
 
       if (role === 'STUDENT' && profileData) {
-        // Validate degreeId if provided
-        if (profileData.degreeId) {
-          const degree = await prisma.degree.findUnique({
-            where: { id: profileData.degreeId },
-          });
-          if (!degree) {
-            await prisma.user.delete({ where: { id: user.id } });
-            res.status(400).json({ error: 'Invalid degree ID' });
-            return;
-          }
+        // Validate degreeId exists
+        const degree = await prisma.degree.findUnique({
+          where: { id: profileData.degreeId },
+        });
+        if (!degree) {
+          await prisma.user.delete({ where: { id: user.id } });
+          res.status(400).json({ error: 'Invalid degree ID' });
+          return;
         }
 
         await prisma.studentProfile.create({
