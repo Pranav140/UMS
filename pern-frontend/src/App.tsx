@@ -6,6 +6,7 @@ import DashboardLayout from '@/pages/dashboard-layout';
 import DashboardPage from '@/pages/dashboard';
 import AttendancePage from '@/pages/attendance';
 import CoursesPage from '@/pages/courses';
+import DegreesPage from '@/pages/degrees';
 import EnrollmentsPage from '@/pages/enrollments';
 import GradesPage from '@/pages/grades';
 import HealthPage from '@/pages/health';
@@ -30,6 +31,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="attendance" element={<AttendancePage />} />
           <Route path="courses" element={<CoursesPage />} />
+          <Route path="degrees" element={<DegreesPage />} />
           <Route path="enrollments" element={<EnrollmentsPage />} />
           <Route path="grades" element={<GradesPage />} />
           <Route path="health" element={<HealthPage />} />

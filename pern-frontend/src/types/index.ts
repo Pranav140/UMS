@@ -39,7 +39,19 @@ export interface StudentProfile {
   id: string;
   userId: string;
   enrollmentYear: number;
+  degreeId: string | null;
   major: string;
+  degree?: Degree | null;
+}
+
+export interface Degree {
+  id: string;
+  code: string;       // Branch code (CSE, ECE, IT, etc.)
+  name: string;       // Full name
+  description: string | null;
+  isMajor: boolean;   // true for major degrees, false for minor
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface FacultyProfile {

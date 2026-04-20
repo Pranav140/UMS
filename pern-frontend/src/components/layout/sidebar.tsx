@@ -40,6 +40,7 @@ const NAV_ITEMS: NavItem[] = [
 
   { label: 'Users', href: '/dashboard/users', icon: <Users size={16} />, roles: ['ADMIN','DEVELOPER'], section: 'admin' },
   { label: 'Courses', href: '/dashboard/courses', icon: <BookOpen size={16} />, roles: ['ADMIN','DEVELOPER'], section: 'admin' },
+  { label: 'Programs', href: '/dashboard/degrees', icon: <GraduationCap size={16} />, roles: ['ADMIN','DEVELOPER'], section: 'admin' },
   { label: 'Semesters', href: '/dashboard/semesters', icon: <CalendarDays size={16} />, roles: ['ADMIN','DEVELOPER'], section: 'admin' },
   { label: 'Sections', href: '/dashboard/sections', icon: <Layers size={16} />, roles: ['ADMIN','DEVELOPER'], section: 'admin' },
   { label: 'Enrollments', href: '/dashboard/enrollments', icon: <GraduationCap size={16} />, roles: ['ADMIN','DEVELOPER'], section: 'admin' },

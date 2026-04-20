@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/auth.store';
-import { usersApi } from '@/lib/api';
+import { usersApi, degreesApi } from '@/lib/api';
 import { PageHeader } from '@/components/layout/page-header';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import { Select } from '@/components/ui/select';
 import { getInitials, getErrorMessage, ROLE_COLORS, ROLE_LABELS, formatDateShort } from '@/lib/utils';
 import { UserPlus, Search, Trash2, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
-import type { User, Role } from '@/types';
+import type { User, Role, Degree } from '@/types';
 
 export default function UsersPage() {
   const { isAdmin } = useAuthStore();
@@ -196,10 +196,17 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function ProvisionModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const qc = useQueryClient();
   const [form, setForm] = useState({
-    name: '', email: '', role: 'STUDENT' as Role, initialPassword: '',
-    enrollmentYear: '', major: '', department: '', title: '',
+    name: '' , email: '', role: 'STUDENT' as Role, initialPassword: '',
+    enrollmentYear: '', degreeId: '', department: '', title: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Fetch degrees - only show major degrees for students
+  const { data: degrees = [] } = useQuery({
+    queryKey: ['degrees', 'major'],
+    queryFn: () => degreesApi.list({ isMajor: true }),
+    enabled: form.role === 'STUDENT',
+  });
 
   const { mutate, isPending } = useMutation({
     mutationFn: (payload: Record<string, unknown>) => usersApi.provision(payload),
@@ -207,7 +214,7 @@ function ProvisionModal({ open, onClose }: { open: boolean; onClose: () => void 
       qc.invalidateQueries({ queryKey: ['users'] });
       toast.success('User provisioned successfully');
       onClose();
-      setForm({ name: '', email: '', role: 'STUDENT', initialPassword: '', enrollmentYear: '', major: '', department: '', title: '' });
+      setForm({ name: '', email: '', role: 'STUDENT', initialPassword: '', enrollmentYear: '', degreeId: '', department: '', title: '' });
     },
     onError: (e) => toast.error(getErrorMessage(e)),
   });
@@ -218,15 +225,27 @@ function ProvisionModal({ open, onClose }: { open: boolean; onClose: () => void 
     if (!form.email.trim()) e.email = 'Email is required';
     if (!form.email.endsWith('@iiitu.ac.in')) e.email = 'Must be an @iiitu.ac.in email';
     if (!form.initialPassword || form.initialPassword.length < 8) e.initialPassword = 'Min 8 characters';
+    if (form.role === 'STUDENT' && !form.degreeId) e.degreeId = 'Degree is required';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const handleSubmit = () => {
     if (!validate()) return;
+    
+    const selectedDegree = form.degreeId ? (degrees as Degree[]).find((d) => d.id === form.degreeId) : null;
     const profileData: Record<string, unknown> = {};
-    if (form.role === 'STUDENT') { profileData.enrollmentYear = Number(form.enrollmentYear) || new Date().getFullYear(); profileData.major = form.major || 'Undeclared'; }
-    if (form.role === 'FACULTY') { profileData.department = form.department || 'General'; profileData.title = form.title || 'Lecturer'; }
+    
+    if (form.role === 'STUDENT') {
+      profileData.enrollmentYear = Number(form.enrollmentYear) || new Date().getFullYear();
+      profileData.degreeId = form.degreeId;
+      profileData.major = selectedDegree?.code || 'Undeclared'; // Use degree code as major
+    }
+    if (form.role === 'FACULTY') {
+      profileData.department = form.department || 'General';
+      profileData.title = form.title || 'Lecturer';
+    }
+    
     mutate({ name: form.name, email: form.email, role: form.role, initialPassword: form.initialPassword, profileData });
   };
 
@@ -241,7 +260,7 @@ function ProvisionModal({ open, onClose }: { open: boolean; onClose: () => void 
           <Input label="Email" placeholder="jane@iiitu.ac.in" value={form.email} onChange={(e) => set('email', e.target.value)} error={errors.email} />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Select label="Role" value={form.role} onChange={(e) => set('role', e.target.value)}>
+          <Select label="Role" value={form.role} onChange={(e) => set('role', e.target.value as Role)}>
             <option value="STUDENT">Student</option>
             <option value="FACULTY">Faculty</option>
             <option value="ADMIN">Admin</option>
@@ -249,12 +268,23 @@ function ProvisionModal({ open, onClose }: { open: boolean; onClose: () => void 
           </Select>
           <Input label="Initial Password" type="password" placeholder="Min 8 chars" value={form.initialPassword} onChange={(e) => set('initialPassword', e.target.value)} error={errors.initialPassword} />
         </div>
+
+        {/* Student-specific fields */}
         {form.role === 'STUDENT' && (
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Enrollment Year" placeholder="2024" value={form.enrollmentYear} onChange={(e) => set('enrollmentYear', e.target.value)} />
-            <Input label="Major" placeholder="Computer Science" value={form.major} onChange={(e) => set('major', e.target.value)} />
+            <Input label="Enrollment Year" placeholder="2024" type="number" value={form.enrollmentYear} onChange={(e) => set('enrollmentYear', e.target.value)} />
+            <Select label="Degree/Branch" value={form.degreeId} onChange={(e) => set('degreeId', e.target.value)} error={errors.degreeId}>
+              <option value="">Select a degree...</option>
+              {(degrees as Degree[]).map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.code} - {d.name}
+                </option>
+              ))}
+            </Select>
           </div>
         )}
+
+        {/* Faculty-specific fields */}
         {form.role === 'FACULTY' && (
           <div className="grid grid-cols-2 gap-3">
             <Input label="Department" placeholder="CSE" value={form.department} onChange={(e) => set('department', e.target.value)} />

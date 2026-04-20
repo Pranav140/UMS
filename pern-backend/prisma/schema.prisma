@@ -63,6 +63,20 @@ model AuditLog {
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 
+// === Degrees ===
+
+model Degree {
+  id          String   @id @default(uuid())
+  code        String   @unique  // Branch code (CSE, ECE, IT, etc.)
+  name        String             // Full name (Computer Science & Engineering, etc.)
+  description String?
+  isMajor     Boolean  @default(true)  // true for major degrees, false for minor degrees
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  studentProfiles StudentProfile[]
+}
+
 // === Phase 2 ===
 
 model Course {
@@ -111,9 +125,11 @@ model StudentProfile {
   id             String @id @default(uuid())
   userId         String @unique
   enrollmentYear Int
-  major          String
+  degreeId       String?
+  major          String  // Branch code (CSE, ECE, IT, etc.)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  degree Degree? @relation(fields: [degreeId], references: [id], onDelete: SetNull)
 }
 
 model FacultyProfile {

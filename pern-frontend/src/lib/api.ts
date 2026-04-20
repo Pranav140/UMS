@@ -12,6 +12,7 @@ import type {
   LoginResponse,
   HealthResponse,
   UserProfile,
+  Degree,
 } from '@/types';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -119,6 +120,24 @@ export const usersApi = {
 
   changePassword: (payload: { currentPassword: string; newPassword: string }): Promise<{ success: boolean; message: string }> =>
     api.post('/users/change-password', payload).then((r) => r.data),
+};
+
+// ─── Degrees ──────────────────────────────────────────────────────────────────
+export const degreesApi = {
+  list: (params?: { isMajor?: boolean }): Promise<Degree[]> =>
+    api.get('/degrees', { params }).then((r) => r.data.degrees),
+
+  get: (id: string): Promise<Degree> =>
+    api.get(`/degrees/${id}`).then((r) => r.data.degree),
+
+  create: (payload: Record<string, unknown>): Promise<{ success: boolean; degree: Degree }> =>
+    api.post('/degrees', payload).then((r) => r.data),
+
+  update: (id: string, payload: Record<string, unknown>): Promise<{ success: boolean; degree: Degree }> =>
+    api.patch(`/degrees/${id}`, payload).then((r) => r.data),
+
+  delete: (id: string): Promise<{ success: boolean; message: string }> =>
+    api.delete(`/degrees/${id}`).then((r) => r.data),
 };
 
 // ─── Courses ──────────────────────────────────────────────────────────────────

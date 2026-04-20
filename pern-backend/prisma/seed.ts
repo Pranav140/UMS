@@ -32,8 +32,27 @@ async function main() {
   await prisma.course.deleteMany({});
   await prisma.facultyProfile.deleteMany({});
   await prisma.studentProfile.deleteMany({});
+  await prisma.degree.deleteMany({});
   await prisma.user.deleteMany({});
   console.log('✓ Database cleaned\n');
+
+  // ============= DEGREES =============
+  console.log('🎓 Creating degrees...');
+
+  const degrees = await Promise.all([
+    // Major degrees
+    prisma.degree.create({ data: { code: 'CSE', name: 'Computer Science & Engineering', isMajor: true } }),
+    prisma.degree.create({ data: { code: 'ECE', name: 'Electronics & Communication Engineering', isMajor: true } }),
+    prisma.degree.create({ data: { code: 'IT', name: 'Information Technology', isMajor: true } }),
+    prisma.degree.create({ data: { code: 'MATH', name: 'Mathematics', isMajor: true } }),
+    
+    // Minor degrees
+    prisma.degree.create({ data: { code: 'AI', name: 'Artificial Intelligence', isMajor: false } }),
+    prisma.degree.create({ data: { code: 'DS', name: 'Data Science', isMajor: false } }),
+    prisma.degree.create({ data: { code: 'CLOUD', name: 'Cloud Computing', isMajor: false } }),
+  ]);
+
+  console.log(`✓ Created ${degrees.length} degrees\n`);
 
   // ============= USERS =============
   console.log('👥 Creating users...');
@@ -151,19 +170,20 @@ async function main() {
   // Students (batch 2024)
   const students2024 = [];
   const studentNames2024 = [
-    { name: 'Student 24429', email: '24429@iiitu.ac.in', major: 'Computer Science & Engineering' },
-    { name: 'Arjun Patel', email: '24101@iiitu.ac.in', major: 'Computer Science & Engineering' },
-    { name: 'Sneha Reddy', email: '24102@iiitu.ac.in', major: 'Computer Science & Engineering' },
-    { name: 'Vikram Singh', email: '24103@iiitu.ac.in', major: 'Computer Science & Engineering' },
-    { name: 'Ananya Iyer', email: '24104@iiitu.ac.in', major: 'Computer Science & Engineering' },
-    { name: 'Rohan Gupta', email: '24105@iiitu.ac.in', major: 'Computer Science & Engineering' },
-    { name: 'Priya Nair', email: '24106@iiitu.ac.in', major: 'Electronics & Communication' },
-    { name: 'Karthik Kumar', email: '24107@iiitu.ac.in', major: 'Electronics & Communication' },
-    { name: 'Divya Sharma', email: '24108@iiitu.ac.in', major: 'Electronics & Communication' },
-    { name: 'Aditya Malhotra', email: '24109@iiitu.ac.in', major: 'Information Technology' },
+    { name: 'Student 24429', email: '24429@iiitu.ac.in', degreeCode: 'CSE' },
+    { name: 'Arjun Patel', email: '24101@iiitu.ac.in', degreeCode: 'CSE' },
+    { name: 'Sneha Reddy', email: '24102@iiitu.ac.in', degreeCode: 'CSE' },
+    { name: 'Vikram Singh', email: '24103@iiitu.ac.in', degreeCode: 'CSE' },
+    { name: 'Ananya Iyer', email: '24104@iiitu.ac.in', degreeCode: 'CSE' },
+    { name: 'Rohan Gupta', email: '24105@iiitu.ac.in', degreeCode: 'CSE' },
+    { name: 'Priya Nair', email: '24106@iiitu.ac.in', degreeCode: 'ECE' },
+    { name: 'Karthik Kumar', email: '24107@iiitu.ac.in', degreeCode: 'ECE' },
+    { name: 'Divya Sharma', email: '24108@iiitu.ac.in', degreeCode: 'ECE' },
+    { name: 'Aditya Malhotra', email: '24109@iiitu.ac.in', degreeCode: 'IT' },
   ];
 
   for (const std of studentNames2024) {
+    const degree = degrees.find((d) => d.code === std.degreeCode);
     const student = await prisma.user.create({
       data: {
         email: std.email,
@@ -173,7 +193,8 @@ async function main() {
         studentProfile: {
           create: {
             enrollmentYear: 2024,
-            major: std.major,
+            degreeId: degree?.id,
+            major: std.degreeCode,
           },
         },
       },
@@ -184,14 +205,15 @@ async function main() {
   // Students (batch 2023)
   const students2023 = [];
   const studentNames2023 = [
-    { name: 'Rahul Verma', email: '23201@iiitu.ac.in', major: 'Computer Science & Engineering' },
-    { name: 'Sakshi Agarwal', email: '23202@iiitu.ac.in', major: 'Computer Science & Engineering' },
-    { name: 'Ayush Tiwari', email: '23203@iiitu.ac.in', major: 'Computer Science & Engineering' },
-    { name: 'Pooja Desai', email: '23204@iiitu.ac.in', major: 'Electronics & Communication' },
-    { name: 'Nikhil Joshi', email: '23205@iiitu.ac.in', major: 'Information Technology' },
+    { name: 'Rahul Verma', email: '23201@iiitu.ac.in', degreeCode: 'CSE' },
+    { name: 'Sakshi Agarwal', email: '23202@iiitu.ac.in', degreeCode: 'CSE' },
+    { name: 'Ayush Tiwari', email: '23203@iiitu.ac.in', degreeCode: 'CSE' },
+    { name: 'Pooja Desai', email: '23204@iiitu.ac.in', degreeCode: 'ECE' },
+    { name: 'Nikhil Joshi', email: '23205@iiitu.ac.in', degreeCode: 'IT' },
   ];
 
   for (const std of studentNames2023) {
+    const degree = degrees.find((d) => d.code === std.degreeCode);
     const student = await prisma.user.create({
       data: {
         email: std.email,
@@ -201,7 +223,8 @@ async function main() {
         studentProfile: {
           create: {
             enrollmentYear: 2023,
-            major: std.major,
+            degreeId: degree?.id,
+            major: std.degreeCode,
           },
         },
       },
