@@ -93,6 +93,7 @@ model Section {
   id         String   @id @default(uuid())
   courseId   String
   semesterId String
+  sectionCode String  // Unique identifier for the section group (e.g., "A", "B", "C", or "Group1", "Group2")
   capacity   Int
   
   course   Course   @relation(fields: [courseId], references: [id])
