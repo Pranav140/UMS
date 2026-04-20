@@ -18,6 +18,11 @@ enum CourseType {
   THEORY_LAB
 }
 
+enum CourseCategory {
+  MAJOR
+  MINOR
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -61,14 +66,15 @@ model AuditLog {
 // === Phase 2 ===
 
 model Course {
-  id          String     @id @default(uuid())
-  code        String     @unique
+  id          String         @id @default(uuid())
+  code        String         @unique
   title       String
   description String?
   credits     Int
-  type        CourseType @default(THEORY) // THEORY for theory-only, THEORY_LAB for courses with lab component
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  type        CourseType     @default(THEORY) // THEORY for theory-only, THEORY_LAB for courses with lab component
+  category    CourseCategory @default(MAJOR)  // MAJOR or MINOR course classification
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   sections Section[]
 }
