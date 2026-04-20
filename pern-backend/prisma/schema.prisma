@@ -13,6 +13,11 @@ enum Role {
   DEVELOPER
 }
 
+enum CourseType {
+  THEORY
+  THEORY_LAB
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -56,13 +61,14 @@ model AuditLog {
 // === Phase 2 ===
 
 model Course {
-  id          String   @id @default(uuid())
-  code        String   @unique
+  id          String     @id @default(uuid())
+  code        String     @unique
   title       String
   description String?
   credits     Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  type        CourseType @default(THEORY) // THEORY for theory-only, THEORY_LAB for courses with lab component
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   sections Section[]
 }
@@ -144,11 +150,16 @@ model Grade {
   id        String   @id @default(uuid())
   studentId String
   sectionId String
-  score     Float?
-  letter    String?  // A, B, C...
-  status    String   @default("DRAFT") // DRAFT, FINALIZED
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  
+  // Score tracking - differentiated by course type
+  theoryScore Float?   // Theory assessment score (used in both THEORY and THEORY_LAB courses)
+  labScore    Float?   // Lab assessment score (only used in THEORY_LAB courses, null for THEORY courses)
+  score       Float?   // Final calculated score (populated after marking is complete)
+  
+  letter    String?   // A, B, C, etc.
+  status    String    @default("DRAFT") // DRAFT, FINALIZED
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   student User    @relation(fields: [studentId], references: [id])
   section Section @relation(fields: [sectionId], references: [id])
