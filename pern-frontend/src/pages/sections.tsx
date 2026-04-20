@@ -66,6 +66,12 @@ export default function SectionsPage() {
             ),
           },
           {
+            key: 'sectionCode',
+            header: 'Section Code',
+            render: (s) => <Badge variant="default">{s.sectionCode}</Badge>,
+            width: '100px',
+          },
+          {
             key: 'faculty',
             header: 'Faculty',
             render: (s) => s.faculty ? (
@@ -129,6 +135,7 @@ function SectionModal({ open, onClose, section, courses, semesters, faculty }: {
   const [form, setForm] = useState({
     courseId: section?.courseId ?? '',
     semesterId: section?.semesterId ?? '',
+    sectionCode: section?.sectionCode ?? '',
     capacity: String(section?.capacity ?? 60),
     facultyId: section?.facultyId ?? '',
   });
@@ -153,6 +160,7 @@ function SectionModal({ open, onClose, section, courses, semesters, faculty }: {
           <option value="">Select semester</option>
           {semesters.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </Select>
+        <Input label="Section Code" placeholder="A" value={form.sectionCode} onChange={(e) => set('sectionCode', e.target.value)} />
         <div className="grid grid-cols-2 gap-3">
           <Input label="Capacity" type="number" min="1" value={form.capacity} onChange={(e) => set('capacity', e.target.value)} />
           <Select label="Faculty (optional)" value={form.facultyId} onChange={(e) => set('facultyId', e.target.value)}>

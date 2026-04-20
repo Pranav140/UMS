@@ -215,29 +215,29 @@ async function main() {
   console.log('📚 Creating courses...');
 
   const courses = await Promise.all([
-    // Core CS Courses
-    prisma.course.create({ data: { code: 'CS101', title: 'Introduction to Programming', description: 'Fundamentals of programming using Python', credits: 4 } }),
-    prisma.course.create({ data: { code: 'CS201', title: 'Data Structures and Algorithms', description: 'Study of fundamental data structures and algorithms', credits: 4 } }),
-    prisma.course.create({ data: { code: 'CS301', title: 'Database Management Systems', description: 'Relational databases, SQL, and transaction management', credits: 3 } }),
-    prisma.course.create({ data: { code: 'CS302', title: 'Operating Systems', description: 'Process management, memory management, and file systems', credits: 4 } }),
-    prisma.course.create({ data: { code: 'CS401', title: 'Computer Networks', description: 'Network protocols, TCP/IP, and network security', credits: 3 } }),
-    prisma.course.create({ data: { code: 'CS402', title: 'Machine Learning', description: 'Introduction to machine learning algorithms and applications', credits: 4 } }),
-    prisma.course.create({ data: { code: 'CS403', title: 'Web Development', description: 'Full-stack web development with modern frameworks', credits: 3 } }),
-    prisma.course.create({ data: { code: 'CS404', title: 'Software Engineering', description: 'Software development lifecycle and best practices', credits: 3 } }),
+    // Core CS Courses (MAJOR, with labs)
+    prisma.course.create({ data: { code: 'CS101', title: 'Introduction to Programming', description: 'Fundamentals of programming using Python', credits: 4, type: 'THEORY_LAB', category: 'MAJOR' } }),
+    prisma.course.create({ data: { code: 'CS201', title: 'Data Structures and Algorithms', description: 'Study of fundamental data structures and algorithms', credits: 4, type: 'THEORY_LAB', category: 'MAJOR' } }),
+    prisma.course.create({ data: { code: 'CS301', title: 'Database Management Systems', description: 'Relational databases, SQL, and transaction management', credits: 3, type: 'THEORY_LAB', category: 'MAJOR' } }),
+    prisma.course.create({ data: { code: 'CS302', title: 'Operating Systems', description: 'Process management, memory management, and file systems', credits: 4, type: 'THEORY_LAB', category: 'MAJOR' } }),
+    prisma.course.create({ data: { code: 'CS401', title: 'Computer Networks', description: 'Network protocols, TCP/IP, and network security', credits: 3, type: 'THEORY_LAB', category: 'MAJOR' } }),
+    prisma.course.create({ data: { code: 'CS402', title: 'Machine Learning', description: 'Introduction to machine learning algorithms and applications', credits: 4, type: 'THEORY_LAB', category: 'MAJOR' } }),
+    prisma.course.create({ data: { code: 'CS403', title: 'Web Development', description: 'Full-stack web development with modern frameworks', credits: 3, type: 'THEORY', category: 'MAJOR' } }),
+    prisma.course.create({ data: { code: 'CS404', title: 'Software Engineering', description: 'Software development lifecycle and best practices', credits: 3, type: 'THEORY', category: 'MAJOR' } }),
     
-    // Mathematics Courses
-    prisma.course.create({ data: { code: 'MATH101', title: 'Calculus I', description: 'Differential and integral calculus', credits: 3 } }),
-    prisma.course.create({ data: { code: 'MATH201', title: 'Linear Algebra', description: 'Vector spaces, matrices, and linear transformations', credits: 3 } }),
-    prisma.course.create({ data: { code: 'MATH301', title: 'Probability and Statistics', description: 'Probability theory and statistical methods', credits: 3 } }),
+    // Mathematics Courses (MAJOR, theory only)
+    prisma.course.create({ data: { code: 'MATH101', title: 'Calculus I', description: 'Differential and integral calculus', credits: 3, type: 'THEORY', category: 'MAJOR' } }),
+    prisma.course.create({ data: { code: 'MATH201', title: 'Linear Algebra', description: 'Vector spaces, matrices, and linear transformations', credits: 3, type: 'THEORY', category: 'MAJOR' } }),
+    prisma.course.create({ data: { code: 'MATH301', title: 'Probability and Statistics', description: 'Probability theory and statistical methods', credits: 3, type: 'THEORY', category: 'MAJOR' } }),
     
-    // ECE Courses
-    prisma.course.create({ data: { code: 'ECE101', title: 'Digital Electronics', description: 'Digital logic design and circuits', credits: 4 } }),
-    prisma.course.create({ data: { code: 'ECE201', title: 'Signals and Systems', description: 'Signal processing and system analysis', credits: 3 } }),
-    prisma.course.create({ data: { code: 'ECE301', title: 'Embedded Systems', description: 'Microcontroller programming and embedded system design', credits: 4 } }),
+    // ECE Courses (MAJOR, with labs)
+    prisma.course.create({ data: { code: 'ECE101', title: 'Digital Electronics', description: 'Digital logic design and circuits', credits: 4, type: 'THEORY_LAB', category: 'MAJOR' } }),
+    prisma.course.create({ data: { code: 'ECE201', title: 'Signals and Systems', description: 'Signal processing and system analysis', credits: 3, type: 'THEORY', category: 'MAJOR' } }),
+    prisma.course.create({ data: { code: 'ECE301', title: 'Embedded Systems', description: 'Microcontroller programming and embedded system design', credits: 4, type: 'THEORY_LAB', category: 'MAJOR' } }),
     
-    // General Courses
-    prisma.course.create({ data: { code: 'ENG101', title: 'Technical Communication', description: 'Written and oral communication skills for engineers', credits: 2 } }),
-    prisma.course.create({ data: { code: 'MGT201', title: 'Engineering Economics', description: 'Economic principles for engineering decision making', credits: 2 } }),
+    // General Courses (MINOR, theory only)
+    prisma.course.create({ data: { code: 'ENG101', title: 'Technical Communication', description: 'Written and oral communication skills for engineers', credits: 2, type: 'THEORY', category: 'MINOR' } }),
+    prisma.course.create({ data: { code: 'MGT201', title: 'Engineering Economics', description: 'Economic principles for engineering decision making', credits: 2, type: 'THEORY', category: 'MINOR' } }),
   ]);
 
   console.log(`✓ Created ${courses.length} courses\n`);
@@ -284,42 +284,42 @@ async function main() {
 
   // CS courses for Spring 2026
   sections.push(await prisma.section.create({ 
-    data: { courseId: courses[0].id, semesterId: semester2.id, capacity: 40, facultyId: facultyProfiles[0].id } 
+    data: { courseId: courses[0].id, semesterId: semester2.id, sectionCode: 'A', capacity: 40, facultyId: facultyProfiles[0].id } 
   }));
   sections.push(await prisma.section.create({ 
-    data: { courseId: courses[1].id, semesterId: semester2.id, capacity: 35, facultyId: facultyProfiles[0].id } 
+    data: { courseId: courses[1].id, semesterId: semester2.id, sectionCode: 'A', capacity: 35, facultyId: facultyProfiles[0].id } 
   }));
   sections.push(await prisma.section.create({ 
-    data: { courseId: courses[2].id, semesterId: semester2.id, capacity: 30, facultyId: facultyProfiles[1].id } 
+    data: { courseId: courses[2].id, semesterId: semester2.id, sectionCode: 'A', capacity: 30, facultyId: facultyProfiles[1].id } 
   }));
   sections.push(await prisma.section.create({ 
-    data: { courseId: courses[3].id, semesterId: semester2.id, capacity: 35, facultyId: facultyProfiles[2].id } 
+    data: { courseId: courses[3].id, semesterId: semester2.id, sectionCode: 'A', capacity: 35, facultyId: facultyProfiles[2].id } 
   }));
   sections.push(await prisma.section.create({ 
-    data: { courseId: courses[4].id, semesterId: semester2.id, capacity: 30, facultyId: facultyProfiles[1].id } 
+    data: { courseId: courses[4].id, semesterId: semester2.id, sectionCode: 'A', capacity: 30, facultyId: facultyProfiles[1].id } 
   }));
   sections.push(await prisma.section.create({ 
-    data: { courseId: courses[5].id, semesterId: semester2.id, capacity: 25, facultyId: facultyProfiles[2].id } 
+    data: { courseId: courses[5].id, semesterId: semester2.id, sectionCode: 'A', capacity: 25, facultyId: facultyProfiles[2].id } 
   }));
   sections.push(await prisma.section.create({ 
-    data: { courseId: courses[8].id, semesterId: semester2.id, capacity: 40, facultyId: facultyProfiles[3].id } 
+    data: { courseId: courses[8].id, semesterId: semester2.id, sectionCode: 'A', capacity: 40, facultyId: facultyProfiles[3].id } 
   }));
   sections.push(await prisma.section.create({ 
-    data: { courseId: courses[10].id, semesterId: semester2.id, capacity: 35, facultyId: facultyProfiles[3].id } 
+    data: { courseId: courses[10].id, semesterId: semester2.id, sectionCode: 'A', capacity: 35, facultyId: facultyProfiles[3].id } 
   }));
   sections.push(await prisma.section.create({ 
-    data: { courseId: courses[11].id, semesterId: semester2.id, capacity: 30, facultyId: facultyProfiles[4].id } 
+    data: { courseId: courses[11].id, semesterId: semester2.id, sectionCode: 'A', capacity: 30, facultyId: facultyProfiles[4].id } 
   }));
   sections.push(await prisma.section.create({ 
-    data: { courseId: courses[12].id, semesterId: semester2.id, capacity: 25, facultyId: facultyProfiles[4].id } 
+    data: { courseId: courses[12].id, semesterId: semester2.id, sectionCode: 'A', capacity: 25, facultyId: facultyProfiles[4].id } 
   }));
 
   // Fall 2025 sections (past)
   sections.push(await prisma.section.create({ 
-    data: { courseId: courses[0].id, semesterId: semester1.id, capacity: 40, facultyId: facultyProfiles[0].id } 
+    data: { courseId: courses[0].id, semesterId: semester1.id, sectionCode: 'A', capacity: 40, facultyId: facultyProfiles[0].id } 
   }));
   sections.push(await prisma.section.create({ 
-    data: { courseId: courses[8].id, semesterId: semester1.id, capacity: 40, facultyId: facultyProfiles[3].id } 
+    data: { courseId: courses[8].id, semesterId: semester1.id, sectionCode: 'A', capacity: 40, facultyId: facultyProfiles[3].id } 
   }));
 
   console.log(`✓ Created ${sections.length} sections\n`);
@@ -430,26 +430,37 @@ async function main() {
           case 'I': score = Math.random() * 35; break;
           default: score = 50;
         }
-        return { letter: gradeLetters[i], score: parseFloat(score.toFixed(1)) };
+        return { letter: gradeLetters[i], theoryScore: parseFloat(score.toFixed(1)), labScore: parseFloat((score * 0.95 + Math.random() * 5).toFixed(1)) };
       }
     }
-    return { letter: 'C', score: 60.0 };
+    return { letter: 'C', theoryScore: 60.0, labScore: 58.0 };
   }
 
   // Finalized grades for past semester
   for (let i = 10; i < sections.length; i++) {
     const section = sections[i];
+    const sectionData = await prisma.section.findUnique({
+      where: { id: section.id },
+      include: { course: true },
+    });
     const enrollments = await prisma.enrollment.findMany({
       where: { sectionId: section.id },
     });
 
     for (const enrollment of enrollments) {
       const grade = getRandomGrade();
+      const isToryLab = sectionData?.course.type === 'THEORY_LAB';
+      const finalScore = isToryLab 
+        ? (grade.theoryScore * 0.7 + grade.labScore * 0.3) 
+        : grade.theoryScore;
+      
       await prisma.grade.create({
         data: {
           studentId: enrollment.studentId,
           sectionId: section.id,
-          score: grade.score,
+          theoryScore: grade.theoryScore,
+          labScore: isToryLab ? grade.labScore : null,
+          score: parseFloat(finalScore.toFixed(1)),
           letter: grade.letter,
           status: 'FINALIZED',
         },
@@ -461,17 +472,28 @@ async function main() {
   // Draft grades for some current semester sections
   for (let i = 0; i < 3; i++) {
     const section = sections[i];
+    const sectionData = await prisma.section.findUnique({
+      where: { id: section.id },
+      include: { course: true },
+    });
     const enrollments = await prisma.enrollment.findMany({
       where: { sectionId: section.id },
     });
 
     for (const enrollment of enrollments) {
       const grade = getRandomGrade();
+      const isToryLab = sectionData?.course.type === 'THEORY_LAB';
+      const finalScore = isToryLab 
+        ? (grade.theoryScore * 0.7 + grade.labScore * 0.3) 
+        : grade.theoryScore;
+      
       await prisma.grade.create({
         data: {
           studentId: enrollment.studentId,
           sectionId: section.id,
-          score: grade.score,
+          theoryScore: grade.theoryScore,
+          labScore: isToryLab ? grade.labScore : null,
+          score: parseFloat(finalScore.toFixed(1)),
           letter: grade.letter,
           status: 'DRAFT',
         },

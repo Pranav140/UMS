@@ -3,6 +3,10 @@
 export type Role = 'STUDENT' | 'FACULTY' | 'ADMIN' | 'DEVELOPER';
 export type GradeStatus = 'DRAFT' | 'FINALIZED';
 
+// ─── Course Types ───────────────────────────────────────────────────────────
+export type CourseType = 'THEORY' | 'THEORY_LAB';
+export type CourseCategory = 'MAJOR' | 'MINOR';
+
 export interface User {
   id: string;
   email: string;
@@ -64,6 +68,8 @@ export interface Course {
   title: string;
   description: string | null;
   credits: number;
+  type: CourseType;           // THEORY or THEORY_LAB
+  category: CourseCategory;   // MAJOR or MINOR
   createdAt?: string;
   updatedAt?: string;
   sections?: Section[];
@@ -82,6 +88,7 @@ export interface Section {
   id: string;
   courseId: string;
   semesterId: string;
+  sectionCode: string;        // Unique identifier for section group (A, B, C, etc.)
   capacity: number;
   facultyId: string | null;
   course?: Course;
@@ -124,7 +131,9 @@ export interface Grade {
   id: string;
   studentId: string;
   sectionId: string;
-  score: number | null;
+  theoryScore: number | null;  // Theory assessment score
+  labScore: number | null;     // Lab assessment score (only for THEORY_LAB courses)
+  score: number | null;        // Final calculated score
   letter: string | null;
   status: GradeStatus;
   createdAt: string;

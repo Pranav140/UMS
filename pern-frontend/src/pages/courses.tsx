@@ -6,12 +6,13 @@ import { PageHeader } from '@/components/layout/page-header';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Modal } from '@/components/ui/modal';
 import { getErrorMessage } from '@/lib/utils';
 import { Plus, Search, Pencil, Trash2, BookOpen, Award } from 'lucide-react';
 import toast from 'react-hot-toast';
-import type { Course } from '@/types';
+import type { Course, CourseType, CourseCategory } from '@/types';
 
 export default function CoursesPage() {
   const { isAdmin } = useAuthStore();
@@ -90,6 +91,8 @@ export default function CoursesPage() {
               </div>
               <div className="flex items-center gap-2 mt-3">
                 <Badge variant="neutral"><Award size={10} className="mr-1" />{c.credits} credits</Badge>
+                <Badge variant={c.type === 'THEORY' ? 'default' : 'neutral'}>{c.type === 'THEORY' ? 'Theory' : 'Theory + Lab'}</Badge>
+                <Badge variant={c.category === 'MAJOR' ? 'default' : 'neutral'}>{c.category}</Badge>
                 {c.sections && c.sections.length > 0 && (
                   <Badge variant="default">{c.sections.length} section{c.sections.length !== 1 ? 's' : ''}</Badge>
                 )}
@@ -113,7 +116,14 @@ export default function CoursesPage() {
 function CourseModal({ open, onClose, course }: { open: boolean; onClose: () => void; course?: Course }) {
   const qc = useQueryClient();
   const isEdit = !!course;
-  const [form, setForm] = useState({ code: course?.code ?? '', title: course?.title ?? '', description: course?.description ?? '', credits: String(course?.credits ?? 3) });
+  const [form, setForm] = useState({
+    code: course?.code ?? '',
+    title: course?.title ?? '',
+    description: course?.description ?? '',
+    credits: String(course?.credits ?? 3),
+    type: (course?.type ?? 'THEORY') as CourseType,
+    category: (course?.category ?? 'MAJOR') as CourseCategory,
+  });
 
   const { mutate, isPending } = useMutation({
     mutationFn: (p: Record<string, unknown>) => isEdit ? coursesApi.update(course!.id, p) : coursesApi.create(p),
@@ -132,6 +142,24 @@ function CourseModal({ open, onClose, course }: { open: boolean; onClose: () => 
           <Input label="Credits" type="number" min="1" max="6" placeholder="3" value={form.credits} onChange={(e) => set('credits', e.target.value)} />
         </div>
         <Input label="Title" placeholder="Operating Systems" value={form.title} onChange={(e) => set('title', e.target.value)} />
+        <div className="grid grid-cols-2 gap-3">
+          <Select
+            label="Course Type"
+            value={form.type}
+            onChange={(e) => set('type', e.target.value)}
+          >
+            <option value="THEORY">Theory Only</option>
+            <option value="THEORY_LAB">Theory + Lab</option>
+          </Select>
+          <Select
+            label="Category"
+            value={form.category}
+            onChange={(e) => set('category', e.target.value)}
+          >
+            <option value="MAJOR">Major</option>
+            <option value="MINOR">Minor</option>
+          </Select>
+        </div>
         <div className="flex flex-col gap-1.5">
           <label className="text-[13px] font-medium text-gray-700 dark:text-gray-300">Description</label>
           <textarea
