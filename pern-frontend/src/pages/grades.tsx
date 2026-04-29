@@ -10,10 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { Select } from '@/components/ui/select';
 import { DataTable } from '@/components/ui/table';
 import { Modal } from '@/components/ui/modal';
-import { getErrorMessage, GRADE_COLORS, GRADE_LETTERS } from '@/lib/utils';
+import { getErrorMessage, GRADE_COLORS } from '@/lib/utils';
 import { Plus, Award } from 'lucide-react';
+import type { Enrollment, Grade, Section, CourseType } from '@/types';
 import toast from 'react-hot-toast';
-import type { Enrollment, Grade, Section } from '@/types';
 
 export default function GradesPage() {
   const { isStudent, isFaculty, isAdmin, user } = useAuthStore();
@@ -22,7 +22,6 @@ export default function GradesPage() {
   return null;
 }
 
-// ─── Student view ──────────────────────────────────────────────────────────────
 function StudentGrades({ studentId }: { studentId: string }) {
   const { data: grades = [], isLoading } = useQuery({
     queryKey: ['grades-student', studentId],
@@ -54,7 +53,7 @@ function StudentGrades({ studentId }: { studentId: string }) {
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-semibold text-gray-900 dark:text-white truncate">{g.section?.course?.title ?? '—'}</p>
                       <p className="text-[11px] text-gray-500 dark:text-gray-500 font-mono">
-                        {g.section?.course?.code} · {g.section?.course?.type === 'THEORY_LAB' ? `Theory: ${g.theoryScore ?? '—'} · Lab: ${g.labScore ?? '—'}` : `Score: ${g.score ?? '—'}`}
+                        {g.section?.course?.code} · Score: {g.score ?? '—'}
                       </p>
                     </div>
                     <span className={`text-[24px] font-bold ${GRADE_COLORS[g.letter ?? ''] ?? ''}`}>{g.letter ?? '—'}</span>
@@ -84,12 +83,10 @@ function StudentGrades({ studentId }: { studentId: string }) {
   );
 }
 
-// ─── Faculty / Admin view ──────────────────────────────────────────────────────
 function FacultyGrades() {
   const [params] = useSearchParams();
   const defaultSection = params.get('section') ?? '';
   const { isFaculty } = useAuthStore();
-  const qc = useQueryClient();
 
   const { data: sections = [] } = useQuery({
     queryKey: isFaculty() ? ['my-sections'] : ['all-enrollments-admin'],
@@ -103,7 +100,6 @@ function FacultyGrades() {
   const [selectedSection, setSelectedSection] = useState(defaultSection || (sectionList[0]?.id ?? ''));
   const [showBulk, setShowBulk] = useState(false);
 
-  // Auto-select first section once sections have loaded
   useEffect(() => {
     if (!selectedSection && sectionList.length > 0) {
       setSelectedSection(sectionList[0].id);
@@ -133,23 +129,7 @@ function FacultyGrades() {
         <DataTable<Grade>
           columns={[
             { key: 'student', header: 'Student', render: (g) => <span className="text-[13px]">{g.student?.name ?? '—'}</span> },
-            {
-              key: 'theoryScore',
-              header: 'Theory',
-              render: (g) => <span className="text-[13px] font-mono">{g.theoryScore ?? '—'}</span>,
-              width: '80px',
-            },
-            ...(sectionList.find((s) => s.id === selectedSection)?.course?.type === 'THEORY_LAB'
-              ? [
-                {
-                  key: 'labScore',
-                  header: 'Lab',
-                  render: (g: Grade) => <span className="text-[13px] font-mono">{g.labScore ?? '—'}</span>,
-                  width: '80px',
-                } as const,
-              ]
-              : []),
-            { key: 'score', header: 'Final', render: (g) => <span className="text-[13px] font-mono font-semibold">{g.score ?? '—'}</span>, width: '80px' },
+            { key: 'score', header: 'Final Score', render: (g) => <span className="text-[13px] font-mono font-semibold">{g.score ?? '—'}</span>, width: '120px' },
             {
               key: 'letter', header: 'Grade',
               render: (g) => <span className={`text-[18px] font-bold ${GRADE_COLORS[g.letter ?? ''] ?? ''}`}>{g.letter ?? '—'}</span>,
@@ -175,14 +155,39 @@ function FacultyGrades() {
   );
 }
 
-// ─── Bulk Grade Modal ─────────────────────────────────────────────────────────
+const COURSE_RUBRICS: Record<CourseType, { key: string, label: string, max: number }[]> = {
+  THEORY: [
+    { key: 'theoryCa', label: 'Continuous (20)', max: 20 },
+    { key: 'theoryMt', label: 'Mid-Term (30)', max: 30 },
+    { key: 'theoryEs', label: 'End Sem (50)', max: 50 },
+  ],
+  LAB: [
+    { key: 'labCa', label: 'Cont. & Demo (40)', max: 40 },
+    { key: 'labFr', label: 'File/Record (10)', max: 10 },
+    { key: 'labEs', label: 'End Sem Viva (50)', max: 50 },
+  ],
+  THEORY_LAB: [
+    { key: 'theoryCa', label: 'Th. CA (20)', max: 20 },
+    { key: 'theoryMt', label: 'Th. Mid (30)', max: 30 },
+    { key: 'theoryEs', label: 'Th. End (50)', max: 50 },
+    { key: 'labCa', label: 'Lab CA (40)', max: 40 },
+    { key: 'labFr', label: 'Lab File (10)', max: 10 },
+    { key: 'labEs', label: 'Lab End (50)', max: 50 },
+  ],
+  PROJECT: [
+    { key: 'projectCa', label: 'Sup. Cont. (20)', max: 20 },
+    { key: 'projectMr', label: 'Mid Review (40)', max: 40 },
+    { key: 'projectEs', label: 'Viv-Voce (40)', max: 40 },
+  ]
+};
+
 function BulkGradeModal({ open, onClose, sectionId }: { open: boolean; onClose: () => void; sectionId: string }) {
   const qc = useQueryClient();
-  const [grades, setGrades] = useState<Array<{ studentId: string; name: string; theoryScore: string; labScore: string; letter: string; status: string }>>([]);
+  const [grades, setGrades] = useState<any[]>([]);
 
-  const { data: section } = useQuery({
-    queryKey: ['section', sectionId],
-    queryFn: () => enrollmentApi.bySection(sectionId) as Promise<Enrollment[]>,
+  const { data: sectionInfo } = useQuery({
+    queryKey: ['section-info', sectionId],
+    queryFn: () => academicApi.gradesBySection(sectionId),
     enabled: open && !!sectionId,
   });
 
@@ -192,30 +197,33 @@ function BulkGradeModal({ open, onClose, sectionId }: { open: boolean; onClose: 
     enabled: open && !!sectionId,
   });
 
-  const courseType = (section as any)?.[0]?.section?.course?.type ?? 'THEORY';
+  const courseType = (enrollments as any)?.[0]?.section?.course?.type ?? 'THEORY';
+  const rubrics = COURSE_RUBRICS[courseType as CourseType] || COURSE_RUBRICS.THEORY;
 
-  // Initialize grade rows when enrollments load (or when modal re-opens)
   useEffect(() => {
     if (open && (enrollments as Enrollment[]).length > 0) {
-      setGrades((enrollments as Enrollment[]).map((e) => ({
-        studentId: e.studentId,
-        name: e.student?.name ?? e.studentId.slice(0, 8),
-        theoryScore: '',
-        labScore: '',
-        letter: 'B',
-        status: 'DRAFT',
-      })));
+      const existing = (sectionInfo || []).reduce((acc: any, g: any) => {
+        acc[g.studentId] = g;
+        return acc;
+      }, {});
+
+      setGrades((enrollments as Enrollment[]).map((e) => {
+        const ex = existing[e.studentId] || {};
+        return {
+          studentId: e.studentId,
+          name: e.student?.name ?? e.studentId.slice(0, 8),
+          theoryCa: ex.theoryCa ?? '', theoryMt: ex.theoryMt ?? '', theoryEs: ex.theoryEs ?? '',
+          labCa: ex.labCa ?? '', labFr: ex.labFr ?? '', labEs: ex.labEs ?? '',
+          projectCa: ex.projectCa ?? '', projectMr: ex.projectMr ?? '', projectEs: ex.projectEs ?? '',
+          status: ex.status || 'DRAFT',
+        };
+      }));
     }
-    if (!open) {
-      setGrades([]);
-    }
-  }, [open, enrollments]);
+    if (!open) setGrades([]);
+  }, [open, enrollments, sectionInfo]);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (payload: {
-      sectionId: string;
-      grades: Array<{ studentId: string; theoryScore: number | null; labScore: number | null; letter: string; status: string }>;
-    }) => academicApi.bulkGrades(payload),
+    mutationFn: (payload: { sectionId: string; grades: any[] }) => academicApi.bulkGrades(payload),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['grades-section', sectionId] }); toast.success('Grades saved'); onClose(); },
     onError: (e) => toast.error(getErrorMessage(e)),
   });
@@ -227,52 +235,45 @@ function BulkGradeModal({ open, onClose, sectionId }: { open: boolean; onClose: 
       footer={<><Button variant="secondary" size="sm" onClick={onClose}>Cancel</Button><Button size="sm" loading={isPending} onClick={() => mutate({
         sectionId, grades: grades.map((g) => ({
           studentId: g.studentId,
-          theoryScore: g.theoryScore ? Number(g.theoryScore) : null,
-          labScore: g.labScore ? Number(g.labScore) : null,
-          letter: g.letter,
+          theoryCa: g.theoryCa !== '' ? Number(g.theoryCa) : undefined,
+          theoryMt: g.theoryMt !== '' ? Number(g.theoryMt) : undefined,
+          theoryEs: g.theoryEs !== '' ? Number(g.theoryEs) : undefined,
+          labCa: g.labCa !== '' ? Number(g.labCa) : undefined,
+          labFr: g.labFr !== '' ? Number(g.labFr) : undefined,
+          labEs: g.labEs !== '' ? Number(g.labEs) : undefined,
+          projectCa: g.projectCa !== '' ? Number(g.projectCa) : undefined,
+          projectMr: g.projectMr !== '' ? Number(g.projectMr) : undefined,
+          projectEs: g.projectEs !== '' ? Number(g.projectEs) : undefined,
           status: g.status,
         }))
-      })}>Save All Grades</Button></>}>
+      })}>Save & Auto-Calculate</Button></>}>
       {grades.length === 0 ? (
         <p className="text-center py-6 text-sm text-gray-400 dark:text-gray-600">No enrolled students found.</p>
       ) : (
-        <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
-          <div className="grid grid-cols-12 gap-2 px-1 mb-1">
-            <p className="col-span-4 text-[11px] font-semibold text-gray-500 dark:text-gray-500 uppercase tracking-wide">Student</p>
-            <p className="col-span-2 text-[11px] font-semibold text-gray-500 dark:text-gray-500 uppercase tracking-wide">Theory</p>
-            {courseType === 'THEORY_LAB' && <p className="col-span-2 text-[11px] font-semibold text-gray-500 dark:text-gray-500 uppercase tracking-wide">Lab</p>}
-            <p className={`col-span-${courseType === 'THEORY_LAB' ? 2 : 3} text-[11px] font-semibold text-gray-500 dark:text-gray-500 uppercase tracking-wide`}>Grade</p>
-            <p className="col-span-2 text-[11px] font-semibold text-gray-500 dark:text-gray-500 uppercase tracking-wide">Status</p>
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 pb-4">
+          <div className="flex bg-black/[0.04] dark:bg-white/[0.04] p-3 rounded-xl border border-black/[0.05] dark:border-white/[0.05]">
+             <div className="flex-1 text-[12px] font-semibold uppercase tracking-wide text-gray-500">Student</div>
+             <div className="flex gap-2">
+                {rubrics.map(r => (
+                  <div key={r.key} className="w-20 text-[10px] font-semibold uppercase text-center text-gray-500 leading-tight">{r.label}</div>
+                ))}
+                <div className="w-24 text-[12px] font-semibold uppercase text-center text-gray-500">Status</div>
+             </div>
           </div>
+          
           {grades.map((g, i) => (
-            <div key={g.studentId} className="grid grid-cols-12 gap-2 items-center">
-              <p className="col-span-4 text-[13px] font-medium text-gray-900 dark:text-white truncate">{g.name}</p>
-              <div className="col-span-2">
-                <input
-                  type="number" min="0" max="100" value={g.theoryScore} onChange={(e) => update(i, 'theoryScore', e.target.value)} placeholder="0–100"
-                  className="w-full h-9 px-2.5 text-sm rounded-lg bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/[0.10] text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-[#0071E3]/15 dark:focus:ring-[#0A84FF]/15"
-                />
-              </div>
-              {courseType === 'THEORY_LAB' && (
-                <div className="col-span-2">
-                  <input
-                    type="number" min="0" max="100" value={g.labScore} onChange={(e) => update(i, 'labScore', e.target.value)} placeholder="0–100"
-                    className="w-full h-9 px-2.5 text-sm rounded-lg bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/[0.10] text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-[#0071E3]/15 dark:focus:ring-[#0A84FF]/15"
+            <div key={g.studentId} className="flex items-center px-2 py-1 border-b border-black/[0.02] dark:border-white/[0.02]">
+              <p className="flex-1 text-[13px] font-medium text-gray-900 dark:text-white truncate pr-4">{g.name}</p>
+              <div className="flex gap-2 items-center">
+                {rubrics.map(r => (
+                  <input key={r.key}
+                    type="number" min="0" max={r.max} value={g[r.key]} onChange={(e) => update(i, r.key, e.target.value)} placeholder={`/${r.max}`}
+                    className="w-20 h-9 px-2 text-center text-sm rounded-lg bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/[0.10] outline-none focus:bg-white focus:ring-2 focus:ring-[#0071E3]/20 transition-all cursor-text text-black dark:text-white"
                   />
-                </div>
-              )}
-              <div className={`col-span-${courseType === 'THEORY_LAB' ? 2 : 3}`}>
-                <select
-                  value={g.letter} onChange={(e) => update(i, 'letter', e.target.value)}
-                  className="w-full h-9 px-2.5 text-sm rounded-lg bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/[0.10] text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-[#0071E3]/15"
-                >
-                  {GRADE_LETTERS.map((l) => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </div>
-              <div className="col-span-2">
+                ))}
                 <select
                   value={g.status} onChange={(e) => update(i, 'status', e.target.value)}
-                  className="w-full h-9 px-2.5 text-[12px] rounded-lg bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/[0.10] text-gray-900 dark:text-gray-100 outline-none"
+                  className="w-24 h-9 px-2 text-[12px] rounded-lg bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/[0.10] outline-none focus:ring-2 focus:ring-[#0071E3]/20 cursor-pointer text-black dark:text-white"
                 >
                   <option value="DRAFT">Draft</option>
                   <option value="FINALIZED">Final</option>
@@ -280,6 +281,7 @@ function BulkGradeModal({ open, onClose, sectionId }: { open: boolean; onClose: 
               </div>
             </div>
           ))}
+          <p className="text-[11px] text-gray-400 mt-4 px-2 italic text-right">*Final composite score and letter grade are automatically generated securely during save.</p>
         </div>
       )}
     </Modal>

@@ -453,10 +453,10 @@ async function main() {
           case 'I': score = Math.random() * 35; break;
           default: score = 50;
         }
-        return { letter: gradeLetters[i], theoryScore: parseFloat(score.toFixed(1)), labScore: parseFloat((score * 0.95 + Math.random() * 5).toFixed(1)) };
+        return { letter: gradeLetters[i], theoryEs: parseFloat(score.toFixed(1)), labEs: parseFloat((score * 0.95 + Math.random() * 5).toFixed(1)) };
       }
     }
-    return { letter: 'C', theoryScore: 60.0, labScore: 58.0 };
+    return { letter: 'C', theoryEs: 60.0, labEs: 58.0 };
   }
 
   // Finalized grades for past semester
@@ -474,15 +474,15 @@ async function main() {
       const grade = getRandomGrade();
       const isToryLab = sectionData?.course.type === 'THEORY_LAB';
       const finalScore = isToryLab 
-        ? (grade.theoryScore * 0.7 + grade.labScore * 0.3) 
-        : grade.theoryScore;
+        ? (grade.theoryEs * 0.7 + grade.labEs * 0.3) 
+        : grade.theoryEs;
       
       await prisma.grade.create({
         data: {
           studentId: enrollment.studentId,
           sectionId: section.id,
-          theoryScore: grade.theoryScore,
-          labScore: isToryLab ? grade.labScore : null,
+          theoryEs: grade.theoryEs,
+          labEs: isToryLab ? grade.labEs : null,
           score: parseFloat(finalScore.toFixed(1)),
           letter: grade.letter,
           status: 'FINALIZED',
@@ -507,15 +507,15 @@ async function main() {
       const grade = getRandomGrade();
       const isToryLab = sectionData?.course.type === 'THEORY_LAB';
       const finalScore = isToryLab 
-        ? (grade.theoryScore * 0.7 + grade.labScore * 0.3) 
-        : grade.theoryScore;
+        ? (grade.theoryEs * 0.7 + grade.labEs * 0.3) 
+        : grade.theoryEs;
       
       await prisma.grade.create({
         data: {
           studentId: enrollment.studentId,
           sectionId: section.id,
-          theoryScore: grade.theoryScore,
-          labScore: isToryLab ? grade.labScore : null,
+          theoryEs: grade.theoryEs,
+          labEs: isToryLab ? grade.labEs : null,
           score: parseFloat(finalScore.toFixed(1)),
           letter: grade.letter,
           status: 'DRAFT',

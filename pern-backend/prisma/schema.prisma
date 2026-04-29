@@ -16,6 +16,8 @@ enum Role {
 enum CourseType {
   THEORY
   THEORY_LAB
+  LAB
+  PROJECT
 }
 
 enum CourseCategory {
@@ -85,6 +87,8 @@ model Course {
   title       String
   description String?
   credits     Int
+  theoryCredits Int?
+  labCredits    Int?
   type        CourseType     @default(THEORY) // THEORY for theory-only, THEORY_LAB for courses with lab component
   category    CourseCategory @default(MAJOR)  // MAJOR or MINOR course classification
   createdAt   DateTime       @default(now())
@@ -175,9 +179,23 @@ model Grade {
   sectionId String
   
   // Score tracking - differentiated by course type
-  theoryScore Float?   // Theory assessment score (used in both THEORY and THEORY_LAB courses)
-  labScore    Float?   // Lab assessment score (only used in THEORY_LAB courses, null for THEORY courses)
-  score       Float?   // Final calculated score (populated after marking is complete)
+  
+  // A. Theory Rubrics (max 100 sum)
+  theoryCa Float?   // Continuous assessment (max 20)
+  theoryMt Float?   // Mid-Term (max 30)
+  theoryEs Float?   // End Semester (max 50)
+  
+  // B. Lab Rubrics (max 100 sum)
+  labCa Float?      // Continuous assessment (max 40)
+  labFr Float?      // Lab File/Record (max 10)
+  labEs Float?      // End Semester/Viva (max 50)
+  
+  // C. Project Rubrics (max 100 sum)
+  projectCa Float?  // Continuous Assessment by Supervisor (max 20)
+  projectMr Float?  // Mid Semester Review (max 40)
+  projectEs Float?  // Final project viva-voce (max 40)
+
+  score     Float?  // Final calculated composite score (0-100)
   
   letter    String?   // A, B, C, etc.
   status    String    @default("DRAFT") // DRAFT, FINALIZED

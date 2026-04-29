@@ -3,6 +3,7 @@ import prisma from '../prisma';
 import { generateTranscriptPDF } from '../services/pdf.service';
 import { AttendanceSchema, BulkAttendanceSchema, BulkGradeSchema, GradeSchema, validate } from '../schemas';
 import { authenticate, authorize } from '../middleware/auth';
+import { calculateFinalScore, calculateLetterGrade } from '../services/grade.service';
 
 const router = Router();
 
@@ -175,15 +176,18 @@ router.post(
   authorize(['FACULTY', 'ADMIN']),
   validate(GradeSchema),
   async (req: Request, res: Response) => {
-    const { sectionId, studentId, score, letter, status } = req.body;
+    const { sectionId, studentId, status, score: givenScore, letter: givenLetter, ...marks } = req.body;
 
+    let section;
     if (req.user!.role === 'FACULTY') {
-      const section = await prisma.section.findUnique({ where: { id: sectionId } });
+      section = await prisma.section.findUnique({ where: { id: sectionId }, include: { course: true } });
       const profile = await prisma.facultyProfile.findUnique({ where: { userId: req.user!.id } });
       if (section?.facultyId !== profile?.id) {
         res.status(403).json({ error: 'You are not assigned to this section.' });
         return;
       }
+    } else {
+      section = await prisma.section.findUnique({ where: { id: sectionId }, include: { course: true } });
     }
 
     try {
@@ -196,10 +200,48 @@ router.post(
         return;
       }
 
+      let finalScore = givenScore;
+      let finalLetter = givenLetter;
+
+      // Automatically calculate total score and letter if not provided explicitly based on rubrics
+      if (section?.course) {
+        const computedScore = calculateFinalScore(section.course, marks);
+        if (givenScore === undefined) finalScore = computedScore;
+        if (givenLetter === undefined) finalLetter = calculateLetterGrade(finalScore || computedScore);
+      }
+
       const grade = await prisma.grade.upsert({
         where: { studentId_sectionId: { studentId, sectionId } },
-        update: { score, letter, status: status || 'DRAFT' },
-        create: { studentId, sectionId, score, letter, status: status || 'DRAFT' },
+        update: { 
+          score: finalScore, 
+          letter: finalLetter, 
+          status: status || 'DRAFT',
+          theoryCa: marks.theoryCa,
+          theoryMt: marks.theoryMt,
+          theoryEs: marks.theoryEs,
+          labCa: marks.labCa,
+          labFr: marks.labFr,
+          labEs: marks.labEs,
+          projectCa: marks.projectCa,
+          projectMr: marks.projectMr,
+          projectEs: marks.projectEs,
+        },
+        create: { 
+          studentId, 
+          sectionId, 
+          score: finalScore, 
+          letter: finalLetter, 
+          status: status || 'DRAFT',
+          theoryCa: marks.theoryCa,
+          theoryMt: marks.theoryMt,
+          theoryEs: marks.theoryEs,
+          labCa: marks.labCa,
+          labFr: marks.labFr,
+          labEs: marks.labEs,
+          projectCa: marks.projectCa,
+          projectMr: marks.projectMr,
+          projectEs: marks.projectEs,
+        },
       });
 
       await prisma.auditLog.create({
@@ -226,30 +268,64 @@ router.post(
   validate(BulkGradeSchema),
   async (req: Request, res: Response) => {
     const { sectionId, grades } = req.body;
+    let section;
 
     if (req.user!.role === 'FACULTY') {
-      const section = await prisma.section.findUnique({ where: { id: sectionId } });
+      section = await prisma.section.findUnique({ where: { id: sectionId }, include: { course: true } });
       const profile = await prisma.facultyProfile.findUnique({ where: { userId: req.user!.id } });
       if (section?.facultyId !== profile?.id) {
         res.status(403).json({ error: 'You are not assigned to this section.' });
         return;
       }
+    } else {
+      section = await prisma.section.findUnique({ where: { id: sectionId }, include: { course: true } });
     }
 
     try {
       const results = await Promise.all(
         grades.map(async (g: any) => {
+          let finalScore = g.score;
+          let finalLetter = g.letter;
+          
+          if (section?.course) {
+            const computedScore = calculateFinalScore(section.course, g);
+            if (g.score === undefined) finalScore = computedScore;
+            if (g.letter === undefined) finalLetter = calculateLetterGrade(finalScore || computedScore);
+          }
+
           return prisma.grade.upsert({
             where: {
               studentId_sectionId: { studentId: g.studentId, sectionId },
             },
-            update: { score: g.score, letter: g.letter, status: g.status || 'DRAFT' },
+            update: { 
+              score: finalScore, 
+              letter: finalLetter, 
+              status: g.status || 'DRAFT',
+              theoryCa: g.theoryCa,
+              theoryMt: g.theoryMt,
+              theoryEs: g.theoryEs,
+              labCa: g.labCa,
+              labFr: g.labFr,
+              labEs: g.labEs,
+              projectCa: g.projectCa,
+              projectMr: g.projectMr,
+              projectEs: g.projectEs,
+            },
             create: {
               studentId: g.studentId,
               sectionId,
-              score: g.score,
-              letter: g.letter,
+              score: finalScore,
+              letter: finalLetter,
               status: g.status || 'DRAFT',
+              theoryCa: g.theoryCa,
+              theoryMt: g.theoryMt,
+              theoryEs: g.theoryEs,
+              labCa: g.labCa,
+              labFr: g.labFr,
+              labEs: g.labEs,
+              projectCa: g.projectCa,
+              projectMr: g.projectMr,
+              projectEs: g.projectEs,
             },
           });
         })

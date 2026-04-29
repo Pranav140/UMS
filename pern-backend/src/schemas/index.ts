@@ -50,13 +50,19 @@ export const CreateCourseSchema = z.object({
   code: z.string().min(1).max(20),
   title: z.string().min(1),
   description: z.string().optional(),
+  type: z.enum(['THEORY', 'THEORY_LAB', 'LAB', 'PROJECT']).default('THEORY'),
   credits: z.number().min(1).max(10),
+  theoryCredits: z.number().min(0).max(10).optional(),
+  labCredits: z.number().min(0).max(10).optional(),
 });
 
 export const UpdateCourseSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().optional(),
+  type: z.enum(['THEORY', 'THEORY_LAB', 'LAB', 'PROJECT']).optional(),
   credits: z.number().min(1).max(10).optional(),
+  theoryCredits: z.number().min(0).max(10).optional(),
+  labCredits: z.number().min(0).max(10).optional(),
 });
 
 // ── Degrees ───────────────────────────────────────────────────────
@@ -121,12 +127,26 @@ export const BulkAttendanceSchema = z.object({
 });
 
 // ── Grades ────────────────────────────────────────────────────────
-export const GradeSchema = z.object({
-  sectionId: z.string().uuid(),
-  studentId: z.string().uuid(),
+const GradeFields = {
+  theoryCa: z.number().min(0).max(20).optional(),
+  theoryMt: z.number().min(0).max(30).optional(),
+  theoryEs: z.number().min(0).max(50).optional(),
+  labCa: z.number().min(0).max(40).optional(),
+  labFr: z.number().min(0).max(10).optional(),
+  labEs: z.number().min(0).max(50).optional(),
+  projectCa: z.number().min(0).max(20).optional(),
+  projectMr: z.number().min(0).max(40).optional(),
+  projectEs: z.number().min(0).max(40).optional(),
+
   score: z.number().min(0).max(100).optional(),
   letter: z.string().min(1).max(3).optional(),
   status: GradeStatusSchema.optional(),
+};
+
+export const GradeSchema = z.object({
+  sectionId: z.string().uuid(),
+  studentId: z.string().uuid(),
+  ...GradeFields,
 });
 
 export const BulkGradeSchema = z.object({
@@ -135,9 +155,7 @@ export const BulkGradeSchema = z.object({
     .array(
       z.object({
         studentId: z.string().uuid(),
-        score: z.number().min(0).max(100).optional(),
-        letter: z.string().min(1).max(3).optional(),
-        status: GradeStatusSchema.optional(),
+        ...GradeFields,
       })
     )
     .min(1),
