@@ -24,12 +24,10 @@ export const useAuthStore = create<AuthStore>()(
       token: null,
 
       setAuth: (user, token) => {
-        sessionStorage.setItem('ums_token', token);
         set({ user, token });
       },
 
       clearAuth: () => {
-        sessionStorage.removeItem('ums_token');
         set({ user: null, token: null });
       },
 

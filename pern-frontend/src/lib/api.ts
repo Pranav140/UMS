@@ -1,4 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { useAuthStore } from '@/store/auth.store';
 import type {
   User,
   Course,
@@ -25,7 +26,7 @@ export const api = axios.create({
 
 // ─── Request interceptor: attach access token ─────────────────────────────
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = sessionStorage.getItem('ums_token');
+  const token = useAuthStore.getState().token;
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -34,7 +35,7 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 // ─── Response interceptor: handle 401, attempt refresh ────────────────────
 let isRefreshing = false;
-let refreshQueue: Array<(token: string) => void> = [];
+let refreshQueue: Array<{ resolve: (value?: any) => void; reject: (reason?: any) => void }> = [];
 
 api.interceptors.response.use(
   (res) => res,
@@ -43,17 +44,18 @@ api.interceptors.response.use(
 
     if (err.response?.status === 401 && !original._retry) {
       if (original.url === '/auth/refresh') {
-        sessionStorage.removeItem('ums_token');
-        window.location.href = '/login';
+        useAuthStore.getState().clearAuth();
         return Promise.reject(err);
       }
 
       if (isRefreshing) {
-        return new Promise((resolve) => {
-          refreshQueue.push((token: string) => {
-            if (original.headers) original.headers.Authorization = `Bearer ${token}`;
-            resolve(api(original));
-          });
+        return new Promise((resolve, reject) => {
+          refreshQueue.push({ resolve, reject });
+        }).then((token) => {
+          if (original.headers) original.headers.Authorization = `Bearer ${token}`;
+          return api(original);
+        }).catch((refreshErr) => {
+          return Promise.reject(refreshErr);
         });
       }
 
@@ -63,16 +65,22 @@ api.interceptors.response.use(
       try {
         const { data } = await api.post<{ token: string }>('/auth/refresh');
         const newToken = data.token;
-        sessionStorage.setItem('ums_token', newToken);
-        refreshQueue.forEach((cb) => cb(newToken));
+        
+        // Update Zustand store so it's always in sync
+        const currentUser = useAuthStore.getState().user;
+        if (currentUser) {
+          useAuthStore.getState().setAuth(currentUser, newToken);
+        }
+        
+        refreshQueue.forEach(({ resolve }) => resolve(newToken));
         refreshQueue = [];
         if (original.headers) original.headers.Authorization = `Bearer ${newToken}`;
         return api(original);
-      } catch {
-        sessionStorage.removeItem('ums_token');
+      } catch (refreshErr) {
+        useAuthStore.getState().clearAuth();
+        refreshQueue.forEach(({ reject }) => reject(refreshErr));
         refreshQueue = [];
-        window.location.href = '/login';
-        return Promise.reject(err);
+        return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;
       }

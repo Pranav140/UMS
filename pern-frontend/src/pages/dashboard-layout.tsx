@@ -10,20 +10,14 @@ export default function DashboardLayout() {
   const { user, token } = useAuthStore();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (hydrated && (!user || !token)) {
+    if (!user || !token) {
       navigate('/login', { replace: true });
     }
-  }, [hydrated, user, token, navigate]);
+  }, [user, token, navigate]);
 
-  if (!hydrated) return <FullPageSpinner />;
-  if (!user || !token) return <FullPageSpinner />;
+  if (!user || !token) return null;
 
   return (
     <div className="min-h-screen bg-[var(--bg-page)]">

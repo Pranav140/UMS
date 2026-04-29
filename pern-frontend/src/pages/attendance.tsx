@@ -12,7 +12,7 @@ import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/ui/table';
 import { getErrorMessage, formatDateShort } from '@/lib/utils';
-import { ClipboardList, Check, X, Plus } from 'lucide-react';
+import { ClipboardList, Check, X, Plus, ChevronDown, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { Enrollment, Section, SectionAttendanceStats } from '@/types';
 
@@ -101,6 +101,15 @@ function FacultyAttendance() {
     enabled: !!selectedSection,
   });
 
+  const groupedAttendance = (attendanceData ?? []).reduce((acc: Record<string, any[]>, curr: any) => {
+    const date = new Date(curr.date).toISOString().split('T')[0];
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(curr);
+    return acc;
+  }, {});
+
+  const sortedDates = Object.keys(groupedAttendance).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
   return (
     <div className="animate-fade-in space-y-6">
       <PageHeader title="Attendance" description="Record and review student attendance"
@@ -121,28 +130,17 @@ function FacultyAttendance() {
 
       {/* Attendance data */}
       {selectedSection && (
-        <DataTable
-          columns={[
-            {
-              key: 'date', header: 'Date',
-              render: (r) => <span className="text-[13px] font-mono">{formatDateShort((r as { date: string }).date)}</span>,
-            },
-            {
-              key: 'student', header: 'Student',
-              render: (r) => <span className="text-[13px]">{(r as { student?: { name: string } }).student?.name ?? '—'}</span>,
-            },
-            {
-              key: 'isPresent', header: 'Status',
-              render: (r) => (r as { isPresent: boolean }).isPresent
-                ? <Badge variant="success" dot>Present</Badge>
-                : <Badge variant="danger" dot>Absent</Badge>,
-              width: '100px',
-            },
-          ]}
-          data={(attendanceData ?? []) as unknown as Record<string, unknown>[]}
-          loading={isLoading}
-          emptyMessage="No attendance records for this section."
-        />
+        <div className="space-y-4">
+          {isLoading ? (
+             <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-14 rounded-2xl bg-white/80 dark:bg-white/[0.04] animate-pulse" />)}</div>
+          ) : sortedDates.length === 0 ? (
+            <GlassCard className="text-center py-12 text-sm text-gray-400 dark:text-gray-600">No attendance records for this section.</GlassCard>
+          ) : (
+            sortedDates.map((date) => (
+              <AttendanceDayGroup key={date} date={date} records={groupedAttendance[date]} />
+            ))
+          )}
+        </div>
       )}
 
       {/* Mark Attendance Modal */}
@@ -154,6 +152,61 @@ function FacultyAttendance() {
         />
       )}
     </div>
+  );
+}
+
+// ─── Attendance Day Group ──────────────────────────────────────────────────────
+function AttendanceDayGroup({ date, records }: { date: string; records: any[] }) {
+  const [open, setOpen] = useState(false);
+  const presentCount = records.filter(r => r.isPresent).length;
+
+  return (
+    <GlassCard padding="none" className="overflow-hidden">
+      <button 
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          {open ? <ChevronDown size={18} className="text-gray-400" /> : <ChevronRight size={18} className="text-gray-400" />}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white text-left">
+              {new Date(date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </h3>
+            <p className="text-[12px] text-gray-500 text-left mt-0.5">
+              {records.length} total students
+            </p>
+          </div>
+        </div>
+        <Badge variant={presentCount / records.length >= 0.75 ? 'success' : 'warning'}>
+          {presentCount} Present · {records.length - presentCount} Absent
+        </Badge>
+      </button>
+      
+      {open && (
+        <div className="border-t border-black/[0.05] dark:border-white/[0.05] p-2 bg-black/[0.01] dark:bg-white/[0.01]">
+          <DataTable
+            columns={[
+              {
+                key: 'student', header: 'Student Name',
+                render: (r) => <span className="text-[13px] font-medium">{(r as any).student?.name ?? '—'}</span>,
+              },
+              {
+                key: 'email', header: 'Email ID',
+                render: (r) => <span className="text-[12px] text-gray-500">{(r as any).student?.email ?? '—'}</span>,
+              },
+              {
+                key: 'status', header: 'Status',
+                render: (r) => (r as any).isPresent 
+                  ? <Badge variant="success" dot>Present</Badge> 
+                  : <Badge variant="danger" dot>Absent</Badge>,
+                width: '100px'
+              },
+            ]}
+            data={records}
+          />
+        </div>
+      )}
+    </GlassCard>
   );
 }
 

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Providers } from '@/providers/Providers';
+import { ProtectedRoute } from '@/components/layout/protected-route';
 
 import LoginPage from '@/pages/login';
 import DashboardLayout from '@/pages/dashboard-layout';
@@ -29,19 +30,36 @@ export default function App() {
         {/* Dashboard (protected via layout) */}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardPage />} />
-          <Route path="attendance" element={<AttendancePage />} />
-          <Route path="courses" element={<CoursesPage />} />
-          <Route path="degrees" element={<DegreesPage />} />
-          <Route path="enrollments" element={<EnrollmentsPage />} />
-          <Route path="grades" element={<GradesPage />} />
-          <Route path="health" element={<HealthPage />} />
-          <Route path="my-courses" element={<MyCoursesPage />} />
-          <Route path="my-sections" element={<MySectionsPage />} />
           <Route path="profile" element={<ProfilePage />} />
-          <Route path="sections" element={<SectionsPage />} />
-          <Route path="semesters" element={<SemestersPage />} />
-          <Route path="transcript" element={<TranscriptPage />} />
-          <Route path="users" element={<UsersPage />} />
+
+          {/* Admin / Developer Only */}
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'DEVELOPER']} />}>
+            <Route path="users" element={<UsersPage />} />
+            <Route path="degrees" element={<DegreesPage />} />
+            <Route path="courses" element={<CoursesPage />} />
+            <Route path="semesters" element={<SemestersPage />} />
+            <Route path="sections" element={<SectionsPage />} />
+            <Route path="health" element={<HealthPage />} />
+          </Route>
+
+          {/* Shared (All Authenticated Roles) */}
+          <Route element={<ProtectedRoute allowedRoles={['STUDENT', 'FACULTY', 'ADMIN', 'DEVELOPER']} />}>
+            <Route path="enrollments" element={<EnrollmentsPage />} />
+            <Route path="attendance" element={<AttendancePage />} />
+            <Route path="grades" element={<GradesPage />} />
+          </Route>
+
+          {/* Faculty Only */}
+          <Route element={<ProtectedRoute allowedRoles={['FACULTY', 'ADMIN', 'DEVELOPER']} />}>
+            <Route path="my-sections" element={<MySectionsPage />} />
+          </Route>
+
+          {/* Student Only */}
+          <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>
+            <Route path="enrollments" element={<EnrollmentsPage />} />
+            <Route path="my-courses" element={<MyCoursesPage />} />
+            <Route path="transcript" element={<TranscriptPage />} />
+          </Route>
         </Route>
 
         {/* Catch-all */}
