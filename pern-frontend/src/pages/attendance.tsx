@@ -252,9 +252,9 @@ function MarkAttendanceModal({ open, onClose, sectionId }: { open: boolean; onCl
             {(enrollmentList as Enrollment[]).map((e) => {
               const isPresent = attendance[e.studentId] ?? true;
               return (
-                <li key={e.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.02]">
-                  <p className="flex-1 text-[13px] text-gray-900 dark:text-white">{e.student?.name ?? e.studentId.slice(0, 8)}</p>
-                  <button onClick={() => toggle(e.studentId)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all ${isPresent ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20' : 'bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20'}`}>
+                <li key={e.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] min-w-max">
+                  <p className="flex-1 min-w-0 truncate text-[13px] text-gray-900 dark:text-white pr-4">{e.student?.name ?? e.studentId.slice(0, 8)}</p>
+                  <button onClick={() => toggle(e.studentId)} className={`flex items-center justify-center shrink-0 gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all ${isPresent ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20' : 'bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20'}`}>
                     {isPresent ? <><Check size={12} />Present</> : <><X size={12} />Absent</>}
                   </button>
                 </li>

@@ -250,30 +250,30 @@ function BulkGradeModal({ open, onClose, sectionId }: { open: boolean; onClose: 
       {grades.length === 0 ? (
         <p className="text-center py-6 text-sm text-gray-400 dark:text-gray-600">No enrolled students found.</p>
       ) : (
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 pb-4">
-          <div className="flex bg-black/[0.04] dark:bg-white/[0.04] p-3 rounded-xl border border-black/[0.05] dark:border-white/[0.05]">
-             <div className="flex-1 text-[12px] font-semibold uppercase tracking-wide text-gray-500">Student</div>
-             <div className="flex gap-2">
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto overflow-x-auto pr-1 pb-4">
+          <div className="flex bg-black/[0.04] dark:bg-white/[0.04] p-3 rounded-xl border border-black/[0.05] dark:border-white/[0.05] min-w-max">
+             <div className="flex-1 text-[12px] font-semibold uppercase tracking-wide text-gray-500 w-48 shrink-0">Student</div>
+             <div className="flex gap-2 shrink-0">
                 {rubrics.map(r => (
-                  <div key={r.key} className="w-20 text-[10px] font-semibold uppercase text-center text-gray-500 leading-tight">{r.label}</div>
+                  <div key={r.key} className="w-20 shrink-0 text-[10px] font-semibold uppercase text-center text-gray-500 leading-tight">{r.label}</div>
                 ))}
-                <div className="w-24 text-[12px] font-semibold uppercase text-center text-gray-500">Status</div>
+                <div className="w-24 shrink-0 text-[12px] font-semibold uppercase text-center text-gray-500">Status</div>
              </div>
           </div>
           
           {grades.map((g, i) => (
-            <div key={g.studentId} className="flex items-center px-2 py-1 border-b border-black/[0.02] dark:border-white/[0.02]">
-              <p className="flex-1 text-[13px] font-medium text-gray-900 dark:text-white truncate pr-4">{g.name}</p>
-              <div className="flex gap-2 items-center">
+            <div key={g.studentId} className="flex items-center px-2 py-1 border-b border-black/[0.02] dark:border-white/[0.02] min-w-max">
+              <p className="flex-1 text-[13px] font-medium text-gray-900 dark:text-white truncate pr-4 w-48 shrink-0">{g.name}</p>
+              <div className="flex gap-2 items-center shrink-0">
                 {rubrics.map(r => (
                   <input key={r.key}
                     type="number" min="0" max={r.max} value={g[r.key]} onChange={(e) => update(i, r.key, e.target.value)} placeholder={`/${r.max}`}
-                    className="w-20 h-9 px-2 text-center text-sm rounded-lg bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/[0.10] outline-none focus:bg-white focus:ring-2 focus:ring-[#0071E3]/20 transition-all cursor-text text-black dark:text-white"
+                    className="w-20 shrink-0 h-9 px-2 text-center text-sm rounded-lg bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/[0.10] outline-none focus:bg-white focus:ring-2 focus:ring-[#0071E3]/20 transition-all cursor-text text-black dark:text-white"
                   />
                 ))}
                 <select
                   value={g.status} onChange={(e) => update(i, 'status', e.target.value)}
-                  className="w-24 h-9 px-2 text-[12px] rounded-lg bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/[0.10] outline-none focus:ring-2 focus:ring-[#0071E3]/20 cursor-pointer text-black dark:text-white"
+                  className="w-24 shrink-0 h-9 px-2 text-[12px] rounded-lg bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/[0.10] outline-none focus:ring-2 focus:ring-[#0071E3]/20 cursor-pointer text-black dark:text-white"
                 >
                   <option value="DRAFT">Draft</option>
                   <option value="FINALIZED">Final</option>
