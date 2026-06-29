@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { GraduationCap, Eye, EyeOff, ArrowRight, Mail, Lock, Sparkles, BookOpen, Award, Activity } from 'lucide-react';
 import { useTheme } from '@/providers/ThemeProvider';
 import { Moon, Sun } from 'lucide-react';
 import { cn, getErrorMessage } from '@/lib/utils';
@@ -22,16 +22,20 @@ export default function LoginPage() {
     if (user && token) navigate('/dashboard', { replace: true });
   }, [user, token, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent, customEmail?: string, customPassword?: string) => {
+    if (e) e.preventDefault();
     setError('');
-    if (!email || !password) {
+
+    const targetEmail = customEmail || email;
+    const targetPassword = customPassword || password;
+
+    if (!targetEmail || !targetPassword) {
       setError('Please enter your email and password.');
       return;
     }
     setLoading(true);
     try {
-      const data = await authApi.login(email, password);
+      const data = await authApi.login(targetEmail, targetPassword);
       setAuth(data.user, data.token);
       toast.success(`Welcome back, ${data.user.name.split(' ')[0]}!`);
       navigate('/dashboard', { replace: true });
@@ -42,78 +46,178 @@ export default function LoginPage() {
     }
   };
 
+  const handleShortcutLogin = (role: 'student' | 'faculty' | 'admin' | 'developer') => {
+    let u = '';
+    let p = '';
+    switch (role) {
+      case 'student':
+        u = '24429@iiitu.ac.in';
+        p = 'Student@2026';
+        break;
+      case 'faculty':
+        u = 'manish.g@iiitu.ac.in';
+        p = 'Faculty@2026';
+        break;
+      case 'admin':
+        u = 'sukhsagar@iiitu.ac.in';
+        p = 'Admin@2026';
+        break;
+      case 'developer':
+        u = 'developer@iiitu.ac.in';
+        p = 'Dev@2026';
+        break;
+    }
+    setEmail(u);
+    setPassword(p);
+    handleSubmit(null as any, u, p);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[var(--bg-page)]">
-      {/* Ambient blobs */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-[#0071E3]/[0.08] dark:bg-[#0A84FF]/[0.05] blur-[120px]" />
-        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-purple-500/[0.06] dark:bg-purple-500/[0.04] blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-sky-400/[0.04] dark:bg-sky-400/[0.03] blur-[100px]" />
+    <div className="min-h-screen flex bg-[#F8F9FD] dark:bg-[#070708] overflow-hidden">
+      {/* LEFT PANEL: Decorative and brand cover (visible on medium screens & up) */}
+      <div className="hidden md:flex w-1/2 relative bg-gradient-to-br from-[#0B0D19] via-[#101426] to-[#1E2340] flex-col justify-between p-12 overflow-hidden border-r border-black/[0.08] dark:border-white/[0.05]">
+        {/* Glow ambient background circles */}
+        <div className="absolute top-[-100px] left-[-100px] w-[400px] h-[400px] rounded-full bg-[#6C87FB]/15 blur-[100px]" />
+        <div className="absolute bottom-[-100px] right-[-100px] w-[450px] h-[450px] rounded-full bg-[#DA47F9]/15 blur-[120px]" />
+        
+        {/* Decorative Grid Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-40" />
+
+        {/* Brand header */}
+        <div className="relative flex items-center gap-3 z-10">
+          <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-[#6C87FB] to-[#DA47F9] flex items-center justify-center shadow-lg shadow-[#6C87FB]/20">
+            <GraduationCap size={20} className="text-white" />
+          </div>
+          <span className="text-[16px] font-bold text-white tracking-wide">UMS Portal</span>
+        </div>
+
+        {/* Visual Graphics - Interactive mock UI previews */}
+        <div className="relative flex flex-col items-center justify-center flex-1 my-8 z-10">
+          {/* Main mock card */}
+          <div className="w-full max-w-[340px] p-5 rounded-[24px] bg-white/[0.03] border border-white/[0.08] backdrop-blur-md shadow-2xl relative animate-pulse-soft">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-[#6C87FB]/25 flex items-center justify-center text-[#6C87FB]">
+                  <Award size={15} />
+                </div>
+                <div>
+                  <h4 className="text-[12px] font-bold text-white leading-tight">Average CGPA</h4>
+                  <p className="text-[10px] text-gray-400">Semester overall</p>
+                </div>
+              </div>
+              <span className="text-[15px] font-extrabold text-[#6C87FB] bg-[#6C87FB]/10 px-2 py-0.5 rounded-lg border border-[#6C87FB]/20">9.24</span>
+            </div>
+
+            {/* Spark line graphic */}
+            <div className="h-12 w-full flex items-end gap-1 mb-2">
+              <div className="w-full h-[30%] bg-white/10 rounded-t-sm" />
+              <div className="w-full h-[45%] bg-white/15 rounded-t-sm" />
+              <div className="w-full h-[60%] bg-[#6C87FB]/30 rounded-t-sm" />
+              <div className="w-full h-[50%] bg-[#6C87FB]/40 rounded-t-sm" />
+              <div className="w-full h-[75%] bg-gradient-to-t from-[#6C87FB] to-[#DA47F9] rounded-t-sm" />
+              <div className="w-full h-[90%] bg-gradient-to-t from-[#6C87FB] to-[#DA47F9] rounded-t-sm animate-pulse" />
+            </div>
+
+            {/* Overlay secondary badge */}
+            <div className="absolute -bottom-6 -right-6 p-3 rounded-[18px] bg-white/[0.05] border border-white/[0.08] backdrop-blur-lg shadow-xl flex items-center gap-2 max-w-[150px]">
+              <div className="w-6 h-6 rounded-full bg-[#DA47F9]/20 flex items-center justify-center text-[#DA47F9]">
+                <Activity size={12} />
+              </div>
+              <div>
+                <h5 className="text-[9px] font-bold text-white">Attendance</h5>
+                <p className="text-[10px] font-black text-gray-200">94.8% Pres.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 text-center max-w-[360px]">
+            <h2 className="text-[20px] font-extrabold text-white leading-snug">
+              Elevate Academic Management
+            </h2>
+            <p className="mt-2 text-[12px] text-gray-400 leading-relaxed">
+              Experience the next-generation portal packed with real-time academic stats, dynamic course rosters, and AI-powered insights.
+            </p>
+          </div>
+        </div>
+
+        {/* Brand footer quote */}
+        <div className="relative text-[11px] text-gray-500 italic z-10">
+          "Education is the passport to the future." — IIIT Una
+        </div>
       </div>
 
-      {/* Theme toggle */}
-      <button
-        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className="fixed top-5 right-5 p-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-black/[0.06] dark:hover:bg-white/[0.08] backdrop-blur-sm bg-white/60 dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] transition-all z-50"
-      >
-        {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-      </button>
+      {/* RIGHT PANEL: Login Form Panel */}
+      <div className="w-full md:w-1/2 flex flex-col justify-between p-6 md:p-12 relative items-center justify-center">
+        {/* Glow ambient background circles for Right Panel */}
+        <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] rounded-full bg-[#6C87FB]/[0.05] dark:bg-[#6C87FB]/[0.03] blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[20%] left-[10%] w-[300px] h-[300px] rounded-full bg-[#DA47F9]/[0.05] dark:bg-[#DA47F9]/[0.03] blur-[100px] pointer-events-none" />
 
-      {/* Card */}
-      <div className="relative w-full max-w-[400px] mx-4">
-        <div className={cn(
-          'rounded-[28px] p-8 backdrop-blur-2xl',
-          'bg-white/80 dark:bg-white/[0.04]',
-          'border border-black/[0.07] dark:border-white/[0.09]',
-          'shadow-2xl shadow-black/[0.08] dark:shadow-black/[0.60]',
-        )}>
-          {/* Logo */}
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-14 h-14 rounded-[18px] bg-gradient-to-br from-[#0071E3] via-[#0A84FF] to-[#6366F1] flex items-center justify-center shadow-lg shadow-[#0071E3]/30 mb-4">
-              <GraduationCap size={26} className="text-white" />
+        {/* Theme toggle */}
+        <div className="w-full flex justify-end z-20">
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="p-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-black/[0.06] dark:hover:bg-white/[0.08] backdrop-blur-sm bg-white/60 dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] transition-all"
+          >
+            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
+        </div>
+
+        {/* Form Card wrapper */}
+        <div className="w-full max-w-[400px] my-auto z-10">
+          <div className="flex flex-col mb-7 text-center md:text-left md:items-start items-center">
+            {/* Logo for mobile view */}
+            <div className="md:hidden w-12 h-12 rounded-[16px] bg-gradient-to-br from-[#6C87FB] to-[#DA47F9] flex items-center justify-center shadow-lg shadow-[#6C87FB]/25 mb-4">
+              <GraduationCap size={22} className="text-white" />
             </div>
-            <h1 className="text-[22px] font-bold text-gray-900 dark:text-white leading-tight">
-              UMS Portal
+            <h1 className="text-[26px] font-black text-gray-900 dark:text-white tracking-tight">
+              Sign In
             </h1>
-            <p className="mt-1 text-[13px] text-gray-500 dark:text-gray-500 text-center">
-              Sign in with your institutional account
+            <p className="mt-1.5 text-[13px] text-gray-400 dark:text-gray-500 font-medium">
+              Enter credentials below to access your institutional dashboard.
             </p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
+            {/* Email input field */}
             <div className="space-y-1.5">
-              <label className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-[12.5px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                 Email address
               </label>
-              <input
-                type="email"
-                autoComplete="email"
-                autoFocus
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@iiitu.ac.in"
-                className={cn(
-                  'w-full h-11 px-4 text-sm rounded-xl',
-                  'bg-black/[0.04] dark:bg-white/[0.06]',
-                  'border border-black/[0.08] dark:border-white/[0.10]',
-                  'text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600',
-                  'outline-none transition-all duration-150',
-                  'focus:bg-white dark:focus:bg-white/[0.08]',
-                  'focus:border-[#0071E3]/60 dark:focus:border-[#0A84FF]/60',
-                  'focus:ring-2 focus:ring-[#0071E3]/15 dark:focus:ring-[#0A84FF]/15',
-                  error && 'border-red-400 dark:border-red-500'
-                )}
-              />
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600 pointer-events-none">
+                  <Mail size={15} />
+                </div>
+                <input
+                  type="email"
+                  autoComplete="email"
+                  autoFocus
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@iiitu.ac.in"
+                  className={cn(
+                    'w-full h-12 pl-11 pr-4 text-sm rounded-2xl',
+                    'bg-[#F2F3F6] dark:bg-[#141416]',
+                    'border border-black/[0.04] dark:border-white/[0.05]',
+                    'text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600',
+                    'outline-none transition-all duration-150',
+                    'focus:bg-white dark:focus:bg-[#1A1A1E]',
+                    'focus:border-[#6C87FB]/60 dark:focus:border-[#6C87FB]/60',
+                    'focus:ring-4 focus:ring-[#6C87FB]/10 dark:focus:ring-[#6C87FB]/10',
+                    error && 'border-red-400 dark:border-red-500'
+                  )}
+                />
+              </div>
             </div>
 
-            {/* Password */}
+            {/* Password input field */}
             <div className="space-y-1.5">
-              <label className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-[12.5px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                 Password
               </label>
               <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600 pointer-events-none">
+                  <Lock size={15} />
+                </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
@@ -121,14 +225,14 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className={cn(
-                    'w-full h-11 px-4 pr-11 text-sm rounded-xl',
-                    'bg-black/[0.04] dark:bg-white/[0.06]',
-                    'border border-black/[0.08] dark:border-white/[0.10]',
+                    'w-full h-12 pl-11 pr-11 text-sm rounded-2xl',
+                    'bg-[#F2F3F6] dark:bg-[#141416]',
+                    'border border-black/[0.04] dark:border-white/[0.05]',
                     'text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600',
                     'outline-none transition-all duration-150',
-                    'focus:bg-white dark:focus:bg-white/[0.08]',
-                    'focus:border-[#0071E3]/60 dark:focus:border-[#0A84FF]/60',
-                    'focus:ring-2 focus:ring-[#0071E3]/15 dark:focus:ring-[#0A84FF]/15',
+                    'focus:bg-white dark:focus:bg-[#1A1A1E]',
+                    'focus:border-[#6C87FB]/60 dark:focus:border-[#6C87FB]/60',
+                    'focus:ring-4 focus:ring-[#6C87FB]/10 dark:focus:ring-[#6C87FB]/10',
                     error && 'border-red-400 dark:border-red-500'
                   )}
                 />
@@ -142,30 +246,30 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Error */}
+            {/* Error messaging bar */}
             {error && (
               <div className="px-3.5 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-[13px] text-red-600 dark:text-red-400 animate-fade-in">
                 {error}
               </div>
             )}
 
-            {/* Submit */}
+            {/* Action button */}
             <button
               type="submit"
               disabled={loading}
               className={cn(
-                'w-full h-11 mt-2 flex items-center justify-center gap-2',
-                'bg-[#0071E3] hover:bg-[#0077ED] active:bg-[#006AD6]',
-                'dark:bg-[#0A84FF] dark:hover:bg-[#409CFF]',
-                'text-white text-[15px] font-semibold rounded-xl',
+                'w-full h-12 mt-2 flex items-center justify-center gap-2 rounded-2xl',
+                'bg-gradient-to-r from-[#6C87FB] to-[#DA47F9]',
+                'hover:opacity-95 active:opacity-100',
+                'text-white text-[15px] font-bold',
                 'transition-all duration-150',
-                'shadow-lg shadow-[#0071E3]/25 dark:shadow-[#0A84FF]/20',
+                'shadow-lg shadow-[#6C87FB]/20',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071E3]/40'
+                'focus:outline-none focus:ring-4 focus:ring-[#6C87FB]/20'
               )}
             >
               {loading ? (
-                <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
               ) : (
                 <>
                   Sign In
@@ -174,12 +278,33 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          {/* Quick Debugging / Testing accounts shortcut pills */}
+          <div className="mt-8 pt-6 border-t border-black/[0.05] dark:border-white/[0.05]">
+            <div className="flex items-center gap-1.5 justify-center md:justify-start mb-2.5">
+              <Sparkles size={13} className="text-[#DA47F9]" />
+              <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                Instant Mock Login
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5 justify-center md:justify-start">
+              {(['student', 'faculty', 'admin', 'developer'] as const).map((role) => (
+                <button
+                  key={role}
+                  onClick={() => handleShortcutLogin(role)}
+                  className="text-[11px] font-bold px-3 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.04] text-gray-500 dark:text-gray-400 hover:bg-black/[0.06] dark:hover:bg-white/[0.08] border border-black/[0.02] dark:border-white/[0.02] transition-all capitalize"
+                >
+                  {role}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Footer */}
-        <p className="text-center text-[11px] text-gray-400 dark:text-gray-600 mt-5">
-          Access restricted to @iiitu.ac.in accounts.
-        </p>
+        {/* Footer info text */}
+        <div className="w-full text-center text-[11px] text-gray-400 dark:text-gray-600 mt-6">
+          Access restricted to @iiitu.ac.in domains. UMS © 2026.
+        </div>
       </div>
     </div>
   );
