@@ -242,12 +242,6 @@ npm run seed                                      # Seed database
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## Team
-
-**IIIT Una - ICT Department**
-
-For questions or support, please contact the development team.
-
 ---
 
 Made with care for IIIT Una
