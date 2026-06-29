@@ -24,7 +24,9 @@ import {
   Bot,
   Sparkles,
   RotateCcw,
-  Send
+  Send,
+  Maximize2,
+  X
 } from 'lucide-react';
 import type { Enrollment, Section, Grade, SectionAttendanceStats } from '@/types';
 
@@ -394,11 +396,18 @@ function AICopilotCard() {
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const modalMessagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+    if (isModalOpen) {
+      setTimeout(() => {
+        modalMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    }
+  }, [messages, isLoading, isModalOpen]);
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) return;
@@ -426,132 +435,324 @@ function AICopilotCard() {
     return ['System load stats', 'Database health'];
   };
 
+  const renderMessageContent = (content: string) => {
+    const lines = content.split('\n');
+    return lines.map((line, lineIdx) => {
+      let text = line;
+      const isBullet = text.trim().startsWith('- ');
+      if (isBullet) {
+        text = text.trim().substring(2);
+      }
+
+      const parts = text.split(/\*\*([^*]+)\*\*/g);
+      const contentNode = parts.map((part, partIdx) => {
+        if (partIdx % 2 === 1) {
+          return (
+            <strong key={partIdx} className="font-extrabold text-gray-900 dark:text-white">
+              {part}
+            </strong>
+          );
+        }
+        return part;
+      });
+
+      if (isBullet) {
+        return (
+          <li key={lineIdx} className="list-disc list-inside ml-2 my-0.5">
+            {contentNode}
+          </li>
+        );
+      }
+
+      return (
+        <p key={lineIdx} className={lineIdx > 0 ? 'mt-1' : ''}>
+          {contentNode}
+        </p>
+      );
+    });
+  };
+
   return (
-    <GlassCard padding="md" className="flex flex-col justify-between h-[280px]">
-      {messages.length === 0 ? (
-        <div className="flex flex-col items-center text-center flex-1 justify-center">
-          <h4 className="text-[13px] font-bold text-gray-400 uppercase tracking-wider mb-2">AI Assistant</h4>
-
-          {/* 3D abstract sphere with animated SVG gradient */}
-          <div className="relative w-16 h-16 mb-2 flex items-center justify-center animate-pulse-soft">
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              <defs>
-                <linearGradient id="sphereGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#DA47F9" />
-                  <stop offset="50%" stopColor="#6C87FB" />
-                  <stop offset="100%" stopColor="#3A5EFB" />
-                </linearGradient>
-                <radialGradient id="sphereInner" cx="30%" cy="30%" r="70%">
-                  <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />
-                  <stop offset="50%" stopColor="#000000" stopOpacity="0.0" />
-                  <stop offset="100%" stopColor="#000000" stopOpacity="0.8" />
-                </radialGradient>
-              </defs>
-              <circle cx="50" cy="50" r="40" fill="url(#sphereGrad)" />
-              <circle cx="50" cy="50" r="40" fill="url(#sphereInner)" />
-              <path
-                d="M 20 50 Q 50 20 80 50 Q 50 80 20 50"
-                fill="none"
-                stroke="white"
-                strokeWidth="1.5"
-                strokeDasharray="4 4"
-                className="opacity-40"
-              />
-              <path
-                d="M 50 20 Q 80 50 50 80 Q 20 50 50 20"
-                fill="none"
-                stroke="white"
-                strokeWidth="1"
-                className="opacity-20"
-              />
-            </svg>
-          </div>
-
-          <p className="text-[13px] font-extrabold text-gray-800 dark:text-gray-200 mb-2">
-            What Can I Help With?
-          </p>
-
-          <div className="flex flex-wrap gap-1.5 justify-center mb-1">
-            {getSuggestions().map((s, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSendMessage(s)}
-                className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.04] text-gray-500 dark:text-gray-400 hover:bg-black/[0.06] dark:hover:bg-white/[0.08] border border-black/[0.02] dark:border-white/[0.02] transition-all"
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <div className="flex items-center justify-between pb-1.5 border-b border-black/[0.04] dark:border-white/[0.05] mb-2">
-            <div className="flex items-center gap-1.5">
-              <Bot size={13} className="text-[#6C87FB]" />
-              <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300">AI Copilot</span>
-            </div>
+    <>
+      <GlassCard padding="md" className="flex flex-col justify-between h-[280px] relative">
+        {/* Floating Controls at Top Right */}
+        <div className="absolute top-[11px] right-3 flex items-center gap-1.5 z-10">
+          {messages.length > 0 && (
             <button
               onClick={() => setMessages([])}
               className="p-1 rounded hover:bg-black/[0.05] dark:hover:bg-white/[0.05] text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all"
               title="Reset Chat"
             >
-              <RotateCcw size={11} />
+              <RotateCcw size={12} />
             </button>
-          </div>
+          )}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="p-1 rounded hover:bg-black/[0.05] dark:hover:bg-white/[0.05] text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all"
+            title="Expand Chat"
+          >
+            <Maximize2 size={12} />
+          </button>
+        </div>
 
-          <div className="flex-1 overflow-y-auto space-y-2 pr-1 text-[11.5px] leading-relaxed flex flex-col">
-            {messages.map((m, idx) => (
-              <div
-                key={idx}
-                className={cn(
-                  "flex flex-col max-w-[85%] rounded-[14px] p-2 py-1.5",
-                  m.role === 'user'
-                    ? "self-end bg-[#6C87FB] text-white ml-auto rounded-tr-none"
-                    : "self-start bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.02] dark:border-white/[0.02] text-gray-700 dark:text-gray-300 mr-auto rounded-tl-none whitespace-pre-line"
-                )}
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center text-center flex-1 justify-center">
+            <h4 className="text-[13px] font-bold text-gray-400 uppercase tracking-wider mb-2">AI Assistant</h4>
+
+            {/* 3D abstract sphere with animated SVG gradient */}
+            <div className="relative w-16 h-16 mb-2 flex items-center justify-center animate-pulse-soft">
+              <svg viewBox="0 0 100 100" className="w-full h-full">
+                <defs>
+                  <linearGradient id="sphereGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#DA47F9" />
+                    <stop offset="50%" stopColor="#6C87FB" />
+                    <stop offset="100%" stopColor="#3A5EFB" />
+                  </linearGradient>
+                  <radialGradient id="sphereInner" cx="30%" cy="30%" r="70%">
+                    <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />
+                    <stop offset="50%" stopColor="#000000" stopOpacity="0.0" />
+                    <stop offset="100%" stopColor="#000000" stopOpacity="0.8" />
+                  </radialGradient>
+                </defs>
+                <circle cx="50" cy="50" r="40" fill="url(#sphereGrad)" />
+                <circle cx="50" cy="50" r="40" fill="url(#sphereInner)" />
+                <path
+                  d="M 20 50 Q 50 20 80 50 Q 50 80 20 50"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeDasharray="4 4"
+                  className="opacity-40"
+                />
+                <path
+                  d="M 50 20 Q 80 50 50 80 Q 20 50 50 20"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="1"
+                  className="opacity-20"
+                />
+              </svg>
+            </div>
+
+            <p className="text-[13px] font-extrabold text-gray-800 dark:text-gray-200 mb-2">
+              What Can I Help With?
+            </p>
+
+            <div className="flex flex-wrap gap-1.5 justify-center mb-1">
+              {getSuggestions().map((s, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSendMessage(s)}
+                  className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.04] text-gray-500 dark:text-gray-400 hover:bg-black/[0.06] dark:hover:bg-white/[0.08] border border-black/[0.02] dark:border-white/[0.02] transition-all"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <div className="flex items-center justify-between pb-1.5 border-b border-black/[0.04] dark:border-white/[0.05] mb-2 pr-12">
+              <div className="flex items-center gap-1.5">
+                <Bot size={13} className="text-[#6C87FB]" />
+                <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300">AI Copilot</span>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 text-[11.5px] leading-relaxed flex flex-col">
+              {messages.map((m, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    "flex flex-col max-w-[85%] rounded-[14px] p-2 py-1.5",
+                    m.role === 'user'
+                      ? "self-end bg-[#6C87FB] text-white ml-auto rounded-tr-none"
+                      : "self-start bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.02] dark:border-white/[0.02] text-gray-750 dark:text-gray-250 mr-auto rounded-tl-none whitespace-pre-line"
+                  )}
+                >
+                  {renderMessageContent(m.content)}
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex items-center gap-1 self-start bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.02] dark:border-white/[0.02] text-gray-400 rounded-[14px] p-2 py-1.5 mr-auto rounded-tl-none">
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+        )}
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSendMessage(inputValue);
+          }}
+          className="mt-3 flex items-center gap-1.5 p-1 bg-[#F4F5F7] dark:bg-[#1C1C1F] border border-black/[0.03] dark:border-white/[0.05] rounded-full"
+        >
+          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white dark:bg-[#121214] text-gray-400 select-none shadow-sm">
+            <Sparkles size={13} className="text-[#DA47F9]" />
+          </div>
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            disabled={isLoading}
+            placeholder="Ask me anything"
+            className="flex-1 bg-transparent border-0 outline-none text-[12px] font-medium text-gray-700 dark:text-gray-300 px-1 placeholder-gray-400 disabled:opacity-50"
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !inputValue.trim()}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-[#6C87FB] text-white hover:bg-[#3A5EFB] disabled:opacity-50 disabled:hover:bg-[#6C87FB] transition-all shadow-md"
+          >
+            <Send size={14} />
+          </button>
+        </form>
+      </GlassCard>
+
+      {/* Expanded Modal Popup */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-full max-w-[650px] h-[550px] relative">
+            <GlassCard padding="lg" className="w-full h-full flex flex-col justify-between shadow-2xl relative border border-black/10 dark:border-white/10 bg-white/95 dark:bg-[#0c0c0e]/95">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.08] mb-4">
+                <div className="flex items-center gap-2">
+                  <Bot size={18} className="text-[#6C87FB]" />
+                  <span className="text-[14px] font-bold text-gray-800 dark:text-white">AI Academic Copilot</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {messages.length > 0 && (
+                    <button
+                      onClick={() => setMessages([])}
+                      className="p-1.5 rounded-full hover:bg-black/[0.05] dark:hover:bg-white/[0.05] text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all"
+                      title="Reset Chat"
+                    >
+                      <RotateCcw size={14} />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="p-1.5 rounded-full hover:bg-black/[0.05] dark:hover:bg-white/[0.05] text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-all"
+                    title="Close"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              {messages.length === 0 ? (
+                <div className="flex flex-col items-center text-center flex-1 justify-center my-6">
+                  <div className="relative w-20 h-20 mb-4 flex items-center justify-center animate-pulse-soft">
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <defs>
+                        <linearGradient id="sphereGradModal" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#DA47F9" />
+                          <stop offset="50%" stopColor="#6C87FB" />
+                          <stop offset="100%" stopColor="#3A5EFB" />
+                        </linearGradient>
+                        <radialGradient id="sphereInnerModal" cx="30%" cy="30%" r="70%">
+                          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />
+                          <stop offset="50%" stopColor="#000000" stopOpacity="0.0" />
+                          <stop offset="100%" stopColor="#000000" stopOpacity="0.8" />
+                        </radialGradient>
+                      </defs>
+                      <circle cx="50" cy="50" r="40" fill="url(#sphereGradModal)" />
+                      <circle cx="50" cy="50" r="40" fill="url(#sphereInnerModal)" />
+                      <path
+                        d="M 20 50 Q 50 20 80 50 Q 50 80 20 50"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="1.5"
+                        strokeDasharray="4 4"
+                        className="opacity-40"
+                      />
+                      <path
+                        d="M 50 20 Q 80 50 50 80 Q 20 50 50 20"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="1"
+                        className="opacity-20"
+                      />
+                    </svg>
+                  </div>
+                  <p className="text-[15px] font-extrabold text-gray-800 dark:text-gray-200 mb-3">
+                    What Can I Help With?
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center max-w-[450px]">
+                    {getSuggestions().map((s, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSendMessage(s)}
+                        className="text-[12px] font-bold px-3.5 py-1.5 rounded-full bg-black/[0.03] dark:bg-white/[0.04] text-gray-500 dark:text-gray-400 hover:bg-black/[0.06] dark:hover:bg-white/[0.08] border border-black/[0.02] dark:border-white/[0.02] transition-all"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1 overflow-y-auto space-y-3 pr-1 text-[13px] leading-relaxed flex flex-col mb-4">
+                  {messages.map((m, idx) => (
+                    <div
+                      key={idx}
+                      className={cn(
+                        "flex flex-col max-w-[80%] rounded-[18px] p-3 py-2",
+                        m.role === 'user'
+                          ? "self-end bg-[#6C87FB] text-white ml-auto rounded-tr-none"
+                          : "self-start bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.02] dark:border-white/[0.02] text-gray-800 dark:text-gray-200 mr-auto rounded-tl-none"
+                      )}
+                    >
+                      {renderMessageContent(m.content)}
+                    </div>
+                  ))}
+                  {isLoading && (
+                    <div className="flex items-center gap-1 self-start bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.02] dark:border-white/[0.02] text-gray-400 rounded-[18px] p-3 py-2 mr-auto rounded-tl-none">
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  )}
+                  <div ref={modalMessagesEndRef} />
+                </div>
+              )}
+
+              {/* Modal Input */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSendMessage(inputValue);
+                }}
+                className="flex items-center gap-2 p-1.5 bg-[#F4F5F7] dark:bg-[#1C1C1F] border border-black/[0.03] dark:border-white/[0.05] rounded-full"
               >
-                {m.content}
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex items-center gap-1 self-start bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.02] dark:border-white/[0.02] text-gray-400 rounded-[14px] p-2 py-1.5 mr-auto rounded-tl-none">
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-            )}
-            <div ref={messagesEndRef} />
+                <div className="w-9 h-9 rounded-full flex items-center justify-center bg-white dark:bg-[#121214] text-gray-400 select-none shadow-sm">
+                  <Sparkles size={15} className="text-[#DA47F9]" />
+                </div>
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  disabled={isLoading}
+                  placeholder="Ask me anything"
+                  className="flex-1 bg-transparent border-0 outline-none text-[13px] font-medium text-gray-700 dark:text-gray-300 px-2 placeholder-gray-400 disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading || !inputValue.trim()}
+                  className="w-9 h-9 rounded-full flex items-center justify-center bg-[#6C87FB] text-white hover:bg-[#3A5EFB] disabled:opacity-50 disabled:hover:bg-[#6C87FB] transition-all shadow-md"
+                >
+                  <Send size={15} />
+                </button>
+              </form>
+            </GlassCard>
           </div>
         </div>
       )}
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSendMessage(inputValue);
-        }}
-        className="mt-3 flex items-center gap-1.5 p-1 bg-[#F4F5F7] dark:bg-[#1C1C1F] border border-black/[0.03] dark:border-white/[0.05] rounded-full"
-      >
-        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white dark:bg-[#121214] text-gray-400 select-none shadow-sm">
-          <Sparkles size={13} className="text-[#DA47F9]" />
-        </div>
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          disabled={isLoading}
-          placeholder="Ask me anything"
-          className="flex-1 bg-transparent border-0 outline-none text-[12px] font-medium text-gray-700 dark:text-gray-300 px-1 placeholder-gray-400 disabled:opacity-50"
-        />
-        <button
-          type="submit"
-          disabled={isLoading || !inputValue.trim()}
-          className="w-8 h-8 rounded-full flex items-center justify-center bg-[#6C87FB] text-white hover:bg-[#3A5EFB] disabled:opacity-50 disabled:hover:bg-[#6C87FB] transition-all shadow-md"
-        >
-          <Send size={14} />
-        </button>
-      </form>
-    </GlassCard>
+    </>
   );
 }
 
