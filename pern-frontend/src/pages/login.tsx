@@ -74,74 +74,74 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex bg-[#F5F5F7] dark:bg-[#000000] overflow-hidden">
-      {/* LEFT PANEL: Decorative and brand cover (visible on medium screens & up) */}
-      <div className="hidden md:flex w-1/2 relative bg-gradient-to-br from-[#F5F5F7] via-[#F2F2F7] to-[#E5E5EA] dark:from-[#000000] dark:via-[#1C1C1E] dark:to-[#0A0A0C] flex-col justify-between p-12 overflow-hidden border-r border-black/[0.06] dark:border-white/[0.05]">
+      {/* LEFT PANEL: Matches Sidebar theme bg-[#0b0b0b] */}
+      <div className="hidden md:flex w-1/2 relative bg-[#0b0b0b] flex-col justify-between p-12 overflow-hidden border-r border-white/[0.05]">
         {/* Glow ambient background circles */}
-        <div className="absolute top-[-100px] left-[-100px] w-[400px] h-[400px] rounded-full bg-[#0071E3]/[0.06] dark:bg-[#0A84FF]/[0.04] blur-[100px]" />
-        <div className="absolute bottom-[-100px] right-[-100px] w-[450px] h-[450px] rounded-full bg-purple-500/[0.04] dark:bg-purple-500/[0.03] blur-[120px]" />
+        <div className="absolute top-[-100px] left-[-100px] w-[400px] h-[400px] rounded-full bg-white/[0.02] blur-[100px]" />
+        <div className="absolute bottom-[-100px] right-[-100px] w-[450px] h-[450px] rounded-full bg-white/[0.03] blur-[120px]" />
         
         {/* Decorative Grid Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-40" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-40" />
 
-        {/* Brand header */}
+        {/* Brand header matching sidebar logo style */}
         <div className="relative flex items-center gap-3 z-10">
-          <div className="w-10 h-10 rounded-[14px] bg-[#0071E3] dark:bg-[#0A84FF] flex items-center justify-center shadow-lg shadow-[#0071E3]/20 dark:shadow-[#0A84FF]/20">
-            <GraduationCap size={20} className="text-white" />
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-black shadow-lg">
+            <GraduationCap size={20} className="stroke-[2.5]" />
           </div>
-          <span className="text-[16px] font-bold text-gray-900 dark:text-white tracking-wide">UMS Portal</span>
+          <span className="text-[16px] font-black text-white tracking-widest leading-none">UMS PORTAL</span>
         </div>
 
-        {/* Visual Graphics - Interactive mock UI previews */}
+        {/* Visual Graphics - Sidebar styled mock UI card */}
         <div className="relative flex flex-col items-center justify-center flex-1 my-8 z-10">
           {/* Main mock card */}
-          <div className="w-full max-w-[340px] p-5 rounded-[24px] bg-white/70 dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-md shadow-xl relative animate-pulse-soft">
+          <div className="w-full max-w-[340px] p-5 rounded-[24px] bg-white/[0.04] border border-white/[0.08] backdrop-blur-md shadow-2xl relative animate-pulse-soft">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#0071E3]/10 dark:bg-[#0A84FF]/10 flex items-center justify-center text-[#0071E3] dark:text-[#0A84FF]">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white">
                   <Award size={15} />
                 </div>
                 <div>
-                  <h4 className="text-[12px] font-bold text-gray-900 dark:text-white leading-tight">Average CGPA</h4>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400">Semester overall</p>
+                  <h4 className="text-[12px] font-bold text-white leading-tight">Average CGPA</h4>
+                  <p className="text-[10px] text-gray-400">Semester overall</p>
                 </div>
               </div>
-              <span className="text-[15px] font-extrabold text-[#0071E3] dark:text-[#0A84FF] bg-[#0071E3]/10 dark:bg-[#0A84FF]/10 px-2 py-0.5 rounded-lg border border-[#0071E3]/20 dark:border-[#0A84FF]/20">9.24</span>
+              <span className="text-[14px] font-black text-black bg-white px-2 py-0.5 rounded-lg border border-white/20">9.24</span>
             </div>
 
             {/* Spark line graphic */}
             <div className="h-12 w-full flex items-end gap-1 mb-2">
-              <div className="w-full h-[30%] bg-black/5 dark:bg-white/10 rounded-t-sm" />
-              <div className="w-full h-[45%] bg-black/10 dark:bg-white/15 rounded-t-sm" />
-              <div className="w-full h-[60%] bg-[#0071E3]/20 dark:bg-[#0A84FF]/20 rounded-t-sm" />
-              <div className="w-full h-[50%] bg-[#0071E3]/30 dark:bg-[#0A84FF]/30 rounded-t-sm" />
-              <div className="w-full h-[75%] bg-gradient-to-t from-[#0071E3] to-[#409CFF] dark:from-[#0A84FF] dark:to-[#60B2FF] rounded-t-sm" />
-              <div className="w-full h-[90%] bg-gradient-to-t from-[#0071E3] to-[#409CFF] dark:from-[#0A84FF] dark:to-[#60B2FF] rounded-t-sm animate-pulse" />
+              <div className="w-full h-[30%] bg-white/5 rounded-t-sm" />
+              <div className="w-full h-[45%] bg-white/10 rounded-t-sm" />
+              <div className="w-full h-[60%] bg-white/15 rounded-t-sm" />
+              <div className="w-full h-[50%] bg-white/20 rounded-t-sm" />
+              <div className="w-full h-[75%] bg-white/40 rounded-t-sm" />
+              <div className="w-full h-[90%] bg-white rounded-t-sm animate-pulse" />
             </div>
 
             {/* Overlay secondary badge */}
-            <div className="absolute -bottom-6 -right-6 p-3 rounded-[18px] bg-white/80 dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-lg shadow-lg flex items-center gap-2 max-w-[150px]">
-              <div className="w-6 h-6 rounded-full bg-[#0071E3]/10 dark:bg-[#0A84FF]/10 flex items-center justify-center text-[#0071E3] dark:text-[#0A84FF]">
+            <div className="absolute -bottom-6 -right-6 p-3 rounded-[18px] bg-[#0b0b0b] border border-white/[0.08] shadow-xl flex items-center gap-2 max-w-[150px]">
+              <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-white">
                 <Activity size={12} />
               </div>
               <div>
-                <h5 className="text-[9px] font-bold text-gray-900 dark:text-white">Attendance</h5>
-                <p className="text-[10px] font-black text-[#0071E3] dark:text-[#0A84FF]">94.8% Pres.</p>
+                <h5 className="text-[9px] font-bold text-gray-400">Attendance</h5>
+                <p className="text-[10px] font-black text-white">94.8% Pres.</p>
               </div>
             </div>
           </div>
 
           <div className="mt-12 text-center max-w-[360px]">
-            <h2 className="text-[20px] font-extrabold text-gray-900 dark:text-white leading-snug">
+            <h2 className="text-[20px] font-extrabold text-white leading-snug">
               Elevate Academic Management
             </h2>
-            <p className="mt-2 text-[12px] text-gray-500 dark:text-gray-400 leading-relaxed">
+            <p className="mt-2 text-[12px] text-gray-400 leading-relaxed">
               Experience the next-generation portal packed with real-time academic stats, dynamic course rosters, and AI-powered insights.
             </p>
           </div>
         </div>
 
         {/* Brand footer quote */}
-        <div className="relative text-[11px] text-gray-400 dark:text-gray-600 italic z-10">
+        <div className="relative text-[11px] text-gray-500 italic z-10">
           "Education is the passport to the future." — IIIT Una
         </div>
       </div>
@@ -149,8 +149,7 @@ export default function LoginPage() {
       {/* RIGHT PANEL: Login Form Panel */}
       <div className="w-full md:w-1/2 flex flex-col justify-between p-6 md:p-12 relative items-center justify-center">
         {/* Glow ambient background circles for Right Panel */}
-        <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] rounded-full bg-[#0071E3]/[0.04] dark:bg-[#0A84FF]/[0.02] blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-[20%] left-[10%] w-[300px] h-[300px] rounded-full bg-purple-500/[0.04] dark:bg-purple-500/[0.02] blur-[100px] pointer-events-none" />
+        <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] rounded-full bg-black/[0.02] dark:bg-white/[0.01] blur-[100px] pointer-events-none" />
 
         {/* Theme toggle */}
         <div className="w-full flex justify-end z-20">
@@ -166,8 +165,8 @@ export default function LoginPage() {
         <div className="w-full max-w-[400px] my-auto z-10">
           <div className="flex flex-col mb-7 text-center md:text-left md:items-start items-center">
             {/* Logo for mobile view */}
-            <div className="md:hidden w-12 h-12 rounded-[16px] bg-[#0071E3] dark:bg-[#0A84FF] flex items-center justify-center shadow-lg shadow-[#0071E3]/20 dark:shadow-[#0A84FF]/20 mb-4">
-              <GraduationCap size={22} className="text-white" />
+            <div className="md:hidden w-12 h-12 rounded-full bg-[#0b0b0b] dark:bg-white flex items-center justify-center text-white dark:text-black shadow-lg mb-4">
+              <GraduationCap size={22} className="stroke-[2.5]" />
             </div>
             <h1 className="text-[26px] font-black text-gray-900 dark:text-white tracking-tight">
               Sign In
@@ -201,8 +200,8 @@ export default function LoginPage() {
                     'text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600',
                     'outline-none transition-all duration-155',
                     'focus:bg-white dark:focus:bg-[#252528]',
-                    'focus:border-[#0071E3]/60 dark:focus:border-[#0A84FF]/60',
-                    'focus:ring-4 focus:ring-[#0071E3]/10 dark:focus:ring-[#0A84FF]/10',
+                    'focus:border-[#0b0b0b]/60 dark:focus:border-white/60',
+                    'focus:ring-4 focus:ring-black/5 dark:focus:ring-white/5',
                     error && 'border-red-400 dark:border-red-500'
                   )}
                 />
@@ -231,8 +230,8 @@ export default function LoginPage() {
                     'text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600',
                     'outline-none transition-all duration-155',
                     'focus:bg-white dark:focus:bg-[#252528]',
-                    'focus:border-[#0071E3]/60 dark:focus:border-[#0A84FF]/60',
-                    'focus:ring-4 focus:ring-[#0071E3]/10 dark:focus:ring-[#0A84FF]/10',
+                    'focus:border-[#0b0b0b]/60 dark:focus:border-white/60',
+                    'focus:ring-4 focus:ring-black/5 dark:focus:ring-white/5',
                     error && 'border-red-400 dark:border-red-500'
                   )}
                 />
@@ -253,23 +252,22 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Action button */}
+            {/* Action button - Matches Sidebar style: dark bg in light mode, white bg in dark mode */}
             <button
               type="submit"
               disabled={loading}
               className={cn(
-                'w-full h-12 mt-2 flex items-center justify-center gap-2 rounded-2xl',
-                'bg-[#0071E3] hover:bg-[#0077ED] active:bg-[#006AD6]',
-                'dark:bg-[#0A84FF] dark:hover:bg-[#409CFF] dark:active:bg-[#0072E3]',
-                'text-white text-[15px] font-bold',
+                'w-full h-12 mt-2 flex items-center justify-center gap-2 rounded-2xl font-bold text-[15px]',
+                'bg-[#0b0b0b] text-white hover:bg-black/90 active:bg-black',
+                'dark:bg-white dark:text-black dark:hover:bg-white/90 dark:active:bg-white',
                 'transition-all duration-150',
-                'shadow-lg shadow-[#0071E3]/15 dark:shadow-[#0A84FF]/15',
+                'shadow-lg shadow-black/10 dark:shadow-white/5',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
-                'focus:outline-none focus:ring-4 focus:ring-[#0071E3]/20 dark:focus:ring-[#0A84FF]/20'
+                'focus:outline-none focus:ring-4 focus:ring-black/20 dark:focus:ring-white/20'
               )}
             >
               {loading ? (
-                <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white dark:border-black/30 dark:border-t-black animate-spin" />
               ) : (
                 <>
                   Sign In
@@ -282,7 +280,7 @@ export default function LoginPage() {
           {/* Quick Debugging / Testing accounts shortcut pills */}
           <div className="mt-8 pt-6 border-t border-black/[0.05] dark:border-white/[0.05]">
             <div className="flex items-center gap-1.5 justify-center md:justify-start mb-2.5">
-              <Sparkles size={13} className="text-[#0071E3] dark:text-[#0A84FF]" />
+              <Sparkles size={13} className="text-gray-400 dark:text-gray-500" />
               <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                 Instant Mock Login
               </span>
@@ -292,7 +290,7 @@ export default function LoginPage() {
                 <button
                   key={role}
                   onClick={() => handleShortcutLogin(role)}
-                  className="text-[11px] font-bold px-3 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.04] text-gray-500 dark:text-gray-400 hover:text-[#0071E3] dark:hover:text-[#0A84FF] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] border border-black/[0.02] dark:border-white/[0.02] transition-all capitalize"
+                  className="text-[11px] font-bold px-3 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.04] text-gray-500 dark:text-gray-400 hover:bg-[#0b0b0b] hover:text-white dark:hover:bg-white dark:hover:text-black border border-black/[0.02] dark:border-white/[0.02] transition-all capitalize"
                 >
                   {role}
                 </button>
