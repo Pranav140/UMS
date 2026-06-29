@@ -73,9 +73,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F5F5F7] dark:bg-[#000000] overflow-hidden">
-      {/* LEFT PANEL: Matches Sidebar theme bg-[#0b0b0b] */}
-      <div className="hidden md:flex w-1/2 relative bg-[#0b0b0b] flex-col justify-between p-12 overflow-hidden border-r border-white/[0.05]">
+    <div className="min-h-screen flex bg-[#F5F5F7] dark:bg-[#000000] p-4 md:p-6 gap-6 overflow-hidden">
+      {/* LEFT PANEL: Floating capsule matching the sidebar styling */}
+      <div className="hidden md:flex w-1/2 relative bg-[#0b0b0b] flex-col justify-between p-10 overflow-hidden rounded-[32px] border border-white/[0.05] shadow-2xl">
         {/* Glow ambient background circles */}
         <div className="absolute top-[-100px] left-[-100px] w-[400px] h-[400px] rounded-full bg-white/[0.02] blur-[100px]" />
         <div className="absolute bottom-[-100px] right-[-100px] w-[450px] h-[450px] rounded-full bg-white/[0.03] blur-[120px]" />
@@ -146,8 +146,8 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* RIGHT PANEL: Login Form Panel */}
-      <div className="w-full md:w-1/2 flex flex-col justify-between p-6 md:p-12 relative items-center justify-center">
+      {/* RIGHT PANEL: Floating Form Card matching content blocks layout */}
+      <div className="w-full md:w-1/2 flex flex-col justify-between p-6 relative rounded-[32px] bg-white dark:bg-[#1C1C1E] border border-black/[0.05] dark:border-white/[0.05] shadow-lg items-center justify-center">
         {/* Glow ambient background circles for Right Panel */}
         <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] rounded-full bg-black/[0.02] dark:bg-white/[0.01] blur-[100px] pointer-events-none" />
 
@@ -162,7 +162,7 @@ export default function LoginPage() {
         </div>
 
         {/* Form Card wrapper */}
-        <div className="w-full max-w-[400px] my-auto z-10">
+        <div className="w-full max-w-[380px] my-auto z-10">
           <div className="flex flex-col mb-7 text-center md:text-left md:items-start items-center">
             {/* Logo for mobile view */}
             <div className="md:hidden w-12 h-12 rounded-full bg-[#0b0b0b] dark:bg-white flex items-center justify-center text-white dark:text-black shadow-lg mb-4">
@@ -195,7 +195,7 @@ export default function LoginPage() {
                   placeholder="you@iiitu.ac.in"
                   className={cn(
                     'w-full h-12 pl-11 pr-4 text-sm rounded-2xl',
-                    'bg-[#EBEBEF] dark:bg-[#1C1C1E]',
+                    'bg-[#F5F5F7] dark:bg-[#121214]',
                     'border border-black/[0.04] dark:border-white/[0.05]',
                     'text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600',
                     'outline-none transition-all duration-155',
@@ -225,7 +225,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   className={cn(
                     'w-full h-12 pl-11 pr-11 text-sm rounded-2xl',
-                    'bg-[#EBEBEF] dark:bg-[#1C1C1E]',
+                    'bg-[#F5F5F7] dark:bg-[#121214]',
                     'border border-black/[0.04] dark:border-white/[0.05]',
                     'text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600',
                     'outline-none transition-all duration-155',
