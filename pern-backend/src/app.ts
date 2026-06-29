@@ -9,6 +9,7 @@ import degreeRoutes from './routes/degree.routes';
 import enrollmentRoutes from './routes/enrollment.routes';
 import academicRoutes from './routes/academic.routes';
 import filesRoutes from './routes/files.routes';
+import aiRoutes from './routes/ai.routes';
 import prisma from './prisma';
 
 const app = express();
@@ -29,6 +30,7 @@ app.use('/api/v1/degrees', degreeRoutes);
 app.use('/api/v1/enrollment', enrollmentRoutes);
 app.use('/api/v1/academic', academicRoutes);
 app.use('/api/v1/files', filesRoutes);
+app.use('/api/v1/ai', aiRoutes);
 
 // ── Health ────────────────────────────────────────────────────────
 app.get('/api/health', async (_req, res) => {
