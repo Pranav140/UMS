@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth.store';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Badge } from '@/components/ui/badge';
-import { enrollmentApi, academicApi, usersApi, semestersApi, healthApi, coursesApi } from '@/lib/api';
+import { enrollmentApi, academicApi, usersApi, semestersApi, healthApi, coursesApi, aiApi } from '@/lib/api';
 import { cn, GRADE_COLORS } from '@/lib/utils';
 import {
   BookOpen,
@@ -20,7 +20,11 @@ import {
   Plus,
   Compass,
   Zap,
-  Globe
+  Globe,
+  Bot,
+  Sparkles,
+  RotateCcw,
+  Send
 } from 'lucide-react';
 import type { Enrollment, Section, Grade, SectionAttendanceStats } from '@/types';
 
@@ -385,69 +389,168 @@ function CRMDonutChart({ segments, total }: { segments: Segment[]; total: number
   );
 }
 
-// ─── 3D SVG Gradient Sphere / AI Copilot ────────────────────────────────────
 function AICopilotCard() {
+  const { isStudent, isFaculty } = useAuthStore();
+  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoading]);
+
+  const handleSendMessage = async (text: string) => {
+    if (!text.trim()) return;
+
+    setMessages((prev) => [...prev, { role: 'user', content: text }]);
+    setInputValue('');
+    setIsLoading(true);
+
+    try {
+      const response = await aiApi.copilot(text);
+      setMessages((prev) => [...prev, { role: 'assistant', content: response.answer }]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: 'Sorry, I encountered an error trying to process that request.' },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getSuggestions = () => {
+    if (isStudent()) return ['Show my GPA', 'List active courses'];
+    if (isFaculty()) return ['List my classes', 'Roster summary'];
+    return ['System load stats', 'Database health'];
+  };
+
   return (
     <GlassCard padding="md" className="flex flex-col justify-between h-[280px]">
-      <div className="flex flex-col items-center text-center">
-        <h4 className="text-[13px] font-bold text-gray-400 uppercase tracking-wider mb-3">AI Assistant</h4>
+      {messages.length === 0 ? (
+        <div className="flex flex-col items-center text-center flex-1 justify-center">
+          <h4 className="text-[13px] font-bold text-gray-400 uppercase tracking-wider mb-2">AI Assistant</h4>
 
-        {/* 3D abstract sphere with animated SVG gradient */}
-        <div className="relative w-20 h-20 mb-3 flex items-center justify-center animate-pulse-soft">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <defs>
-              <linearGradient id="sphereGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#DA47F9" />
-                <stop offset="50%" stopColor="#6C87FB" />
-                <stop offset="100%" stopColor="#3A5EFB" />
-              </linearGradient>
-              <radialGradient id="sphereInner" cx="30%" cy="30%" r="70%">
-                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />
-                <stop offset="50%" stopColor="#000000" stopOpacity="0.0" />
-                <stop offset="100%" stopColor="#000000" stopOpacity="0.8" />
-              </radialGradient>
-            </defs>
-            {/* Layered circles to make it look 3D and twisted */}
-            <circle cx="50" cy="50" r="40" fill="url(#sphereGrad)" />
-            <circle cx="50" cy="50" r="40" fill="url(#sphereInner)" />
-            {/* Swirl paths */}
-            <path
-              d="M 20 50 Q 50 20 80 50 Q 50 80 20 50"
-              fill="none"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeDasharray="4 4"
-              className="opacity-40"
-            />
-            <path
-              d="M 50 20 Q 80 50 50 80 Q 20 50 50 20"
-              fill="none"
-              stroke="white"
-              strokeWidth="1"
-              className="opacity-20"
-            />
-          </svg>
+          {/* 3D abstract sphere with animated SVG gradient */}
+          <div className="relative w-16 h-16 mb-2 flex items-center justify-center animate-pulse-soft">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <defs>
+                <linearGradient id="sphereGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#DA47F9" />
+                  <stop offset="50%" stopColor="#6C87FB" />
+                  <stop offset="100%" stopColor="#3A5EFB" />
+                </linearGradient>
+                <radialGradient id="sphereInner" cx="30%" cy="30%" r="70%">
+                  <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />
+                  <stop offset="50%" stopColor="#000000" stopOpacity="0.0" />
+                  <stop offset="100%" stopColor="#000000" stopOpacity="0.8" />
+                </radialGradient>
+              </defs>
+              <circle cx="50" cy="50" r="40" fill="url(#sphereGrad)" />
+              <circle cx="50" cy="50" r="40" fill="url(#sphereInner)" />
+              <path
+                d="M 20 50 Q 50 20 80 50 Q 50 80 20 50"
+                fill="none"
+                stroke="white"
+                strokeWidth="1.5"
+                strokeDasharray="4 4"
+                className="opacity-40"
+              />
+              <path
+                d="M 50 20 Q 80 50 50 80 Q 20 50 50 20"
+                fill="none"
+                stroke="white"
+                strokeWidth="1"
+                className="opacity-20"
+              />
+            </svg>
+          </div>
+
+          <p className="text-[13px] font-extrabold text-gray-800 dark:text-gray-200 mb-2">
+            What Can I Help With?
+          </p>
+
+          <div className="flex flex-wrap gap-1.5 justify-center mb-1">
+            {getSuggestions().map((s, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSendMessage(s)}
+                className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.04] text-gray-500 dark:text-gray-400 hover:bg-black/[0.06] dark:hover:bg-white/[0.08] border border-black/[0.02] dark:border-white/[0.02] transition-all"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
         </div>
+      ) : (
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex items-center justify-between pb-1.5 border-b border-black/[0.04] dark:border-white/[0.05] mb-2">
+            <div className="flex items-center gap-1.5">
+              <Bot size={13} className="text-[#6C87FB]" />
+              <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300">AI Copilot</span>
+            </div>
+            <button
+              onClick={() => setMessages([])}
+              className="p-1 rounded hover:bg-black/[0.05] dark:hover:bg-white/[0.05] text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all"
+              title="Reset Chat"
+            >
+              <RotateCcw size={11} />
+            </button>
+          </div>
 
-        <p className="text-[14px] font-extrabold text-gray-800 dark:text-gray-200">
-          What Can I Help With?
-        </p>
-      </div>
+          <div className="flex-1 overflow-y-auto space-y-2 pr-1 text-[11.5px] leading-relaxed flex flex-col">
+            {messages.map((m, idx) => (
+              <div
+                key={idx}
+                className={cn(
+                  "flex flex-col max-w-[85%] rounded-[14px] p-2 py-1.5",
+                  m.role === 'user'
+                    ? "self-end bg-[#6C87FB] text-white ml-auto rounded-tr-none"
+                    : "self-start bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.02] dark:border-white/[0.02] text-gray-700 dark:text-gray-300 mr-auto rounded-tl-none whitespace-pre-line"
+                )}
+              >
+                {m.content}
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex items-center gap-1 self-start bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.02] dark:border-white/[0.02] text-gray-400 rounded-[14px] p-2 py-1.5 mr-auto rounded-tl-none">
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+      )}
 
-      {/* Pill input at the bottom */}
-      <div className="mt-4 flex items-center gap-1.5 p-1 bg-[#F4F5F7] dark:bg-white/[0.04] border border-black/[0.03] dark:border-white/[0.05] rounded-full">
-        <button className="w-8 h-8 rounded-full flex items-center justify-center bg-white dark:bg-[#121214] text-gray-500 hover:text-gray-700 dark:hover:text-white transition-all shadow-sm">
-          <Plus size={14} />
-        </button>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSendMessage(inputValue);
+        }}
+        className="mt-3 flex items-center gap-1.5 p-1 bg-[#F4F5F7] dark:bg-[#1C1C1F] border border-black/[0.03] dark:border-white/[0.05] rounded-full"
+      >
+        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white dark:bg-[#121214] text-gray-400 select-none shadow-sm">
+          <Sparkles size={13} className="text-[#DA47F9]" />
+        </div>
         <input
           type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          disabled={isLoading}
           placeholder="Ask me anything"
-          className="flex-1 bg-transparent border-0 outline-none text-[12px] font-medium text-gray-700 dark:text-gray-300 px-1 placeholder-gray-400"
+          className="flex-1 bg-transparent border-0 outline-none text-[12px] font-medium text-gray-700 dark:text-gray-300 px-1 placeholder-gray-400 disabled:opacity-50"
         />
-        <button className="w-8 h-8 rounded-full flex items-center justify-center bg-[#6C87FB] text-white hover:bg-[#3A5EFB] transition-all shadow-md">
-          <ArrowUp size={14} />
+        <button
+          type="submit"
+          disabled={isLoading || !inputValue.trim()}
+          className="w-8 h-8 rounded-full flex items-center justify-center bg-[#6C87FB] text-white hover:bg-[#3A5EFB] disabled:opacity-50 disabled:hover:bg-[#6C87FB] transition-all shadow-md"
+        >
+          <Send size={14} />
         </button>
-      </div>
+      </form>
     </GlassCard>
   );
 }

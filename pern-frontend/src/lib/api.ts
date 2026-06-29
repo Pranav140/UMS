@@ -267,3 +267,9 @@ export const academicApi = {
       .get(`/academic/transcript/${studentId}`, { responseType: 'blob' })
       .then((r) => r.data),
 };
+
+// ─── AI Copilot ────────────────────────────────────────────────────────────────
+export const aiApi = {
+  copilot: (message: string): Promise<{ answer: string }> =>
+    api.post('/ai/copilot', { message }).then((r) => r.data),
+};
