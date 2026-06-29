@@ -11,9 +11,14 @@ router.post('/copilot', authenticate, async (req: Request, res: Response) => {
     return;
   }
 
-  const { id: userId, role, name } = req.user!;
+  const { id: userId, role } = req.user!;
 
   try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true }
+    });
+    const name = dbUser?.name ?? 'User';
     let contextData: any = {};
 
     // Gather context depending on role
