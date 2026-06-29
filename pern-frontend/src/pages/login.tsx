@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, Eye, EyeOff, ArrowRight, Mail, Lock, Sparkles, BookOpen, Award, Activity } from 'lucide-react';
+import { GraduationCap, Eye, EyeOff, ArrowRight, Mail, Lock, Sparkles, Award, Activity } from 'lucide-react';
 import { useTheme } from '@/providers/ThemeProvider';
 import { Moon, Sun } from 'lucide-react';
 import { cn, getErrorMessage } from '@/lib/utils';
@@ -73,75 +73,75 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F8F9FD] dark:bg-[#070708] overflow-hidden">
+    <div className="min-h-screen flex bg-[#F5F5F7] dark:bg-[#000000] overflow-hidden">
       {/* LEFT PANEL: Decorative and brand cover (visible on medium screens & up) */}
-      <div className="hidden md:flex w-1/2 relative bg-gradient-to-br from-[#0B0D19] via-[#101426] to-[#1E2340] flex-col justify-between p-12 overflow-hidden border-r border-black/[0.08] dark:border-white/[0.05]">
+      <div className="hidden md:flex w-1/2 relative bg-gradient-to-br from-[#F5F5F7] via-[#F2F2F7] to-[#E5E5EA] dark:from-[#000000] dark:via-[#1C1C1E] dark:to-[#0A0A0C] flex-col justify-between p-12 overflow-hidden border-r border-black/[0.06] dark:border-white/[0.05]">
         {/* Glow ambient background circles */}
-        <div className="absolute top-[-100px] left-[-100px] w-[400px] h-[400px] rounded-full bg-[#6C87FB]/15 blur-[100px]" />
-        <div className="absolute bottom-[-100px] right-[-100px] w-[450px] h-[450px] rounded-full bg-[#DA47F9]/15 blur-[120px]" />
+        <div className="absolute top-[-100px] left-[-100px] w-[400px] h-[400px] rounded-full bg-[#0071E3]/[0.06] dark:bg-[#0A84FF]/[0.04] blur-[100px]" />
+        <div className="absolute bottom-[-100px] right-[-100px] w-[450px] h-[450px] rounded-full bg-purple-500/[0.04] dark:bg-purple-500/[0.03] blur-[120px]" />
         
         {/* Decorative Grid Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-40" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-40" />
 
         {/* Brand header */}
         <div className="relative flex items-center gap-3 z-10">
-          <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-[#6C87FB] to-[#DA47F9] flex items-center justify-center shadow-lg shadow-[#6C87FB]/20">
+          <div className="w-10 h-10 rounded-[14px] bg-[#0071E3] dark:bg-[#0A84FF] flex items-center justify-center shadow-lg shadow-[#0071E3]/20 dark:shadow-[#0A84FF]/20">
             <GraduationCap size={20} className="text-white" />
           </div>
-          <span className="text-[16px] font-bold text-white tracking-wide">UMS Portal</span>
+          <span className="text-[16px] font-bold text-gray-900 dark:text-white tracking-wide">UMS Portal</span>
         </div>
 
         {/* Visual Graphics - Interactive mock UI previews */}
         <div className="relative flex flex-col items-center justify-center flex-1 my-8 z-10">
           {/* Main mock card */}
-          <div className="w-full max-w-[340px] p-5 rounded-[24px] bg-white/[0.03] border border-white/[0.08] backdrop-blur-md shadow-2xl relative animate-pulse-soft">
+          <div className="w-full max-w-[340px] p-5 rounded-[24px] bg-white/70 dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-md shadow-xl relative animate-pulse-soft">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#6C87FB]/25 flex items-center justify-center text-[#6C87FB]">
+                <div className="w-8 h-8 rounded-full bg-[#0071E3]/10 dark:bg-[#0A84FF]/10 flex items-center justify-center text-[#0071E3] dark:text-[#0A84FF]">
                   <Award size={15} />
                 </div>
                 <div>
-                  <h4 className="text-[12px] font-bold text-white leading-tight">Average CGPA</h4>
-                  <p className="text-[10px] text-gray-400">Semester overall</p>
+                  <h4 className="text-[12px] font-bold text-gray-900 dark:text-white leading-tight">Average CGPA</h4>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">Semester overall</p>
                 </div>
               </div>
-              <span className="text-[15px] font-extrabold text-[#6C87FB] bg-[#6C87FB]/10 px-2 py-0.5 rounded-lg border border-[#6C87FB]/20">9.24</span>
+              <span className="text-[15px] font-extrabold text-[#0071E3] dark:text-[#0A84FF] bg-[#0071E3]/10 dark:bg-[#0A84FF]/10 px-2 py-0.5 rounded-lg border border-[#0071E3]/20 dark:border-[#0A84FF]/20">9.24</span>
             </div>
 
             {/* Spark line graphic */}
             <div className="h-12 w-full flex items-end gap-1 mb-2">
-              <div className="w-full h-[30%] bg-white/10 rounded-t-sm" />
-              <div className="w-full h-[45%] bg-white/15 rounded-t-sm" />
-              <div className="w-full h-[60%] bg-[#6C87FB]/30 rounded-t-sm" />
-              <div className="w-full h-[50%] bg-[#6C87FB]/40 rounded-t-sm" />
-              <div className="w-full h-[75%] bg-gradient-to-t from-[#6C87FB] to-[#DA47F9] rounded-t-sm" />
-              <div className="w-full h-[90%] bg-gradient-to-t from-[#6C87FB] to-[#DA47F9] rounded-t-sm animate-pulse" />
+              <div className="w-full h-[30%] bg-black/5 dark:bg-white/10 rounded-t-sm" />
+              <div className="w-full h-[45%] bg-black/10 dark:bg-white/15 rounded-t-sm" />
+              <div className="w-full h-[60%] bg-[#0071E3]/20 dark:bg-[#0A84FF]/20 rounded-t-sm" />
+              <div className="w-full h-[50%] bg-[#0071E3]/30 dark:bg-[#0A84FF]/30 rounded-t-sm" />
+              <div className="w-full h-[75%] bg-gradient-to-t from-[#0071E3] to-[#409CFF] dark:from-[#0A84FF] dark:to-[#60B2FF] rounded-t-sm" />
+              <div className="w-full h-[90%] bg-gradient-to-t from-[#0071E3] to-[#409CFF] dark:from-[#0A84FF] dark:to-[#60B2FF] rounded-t-sm animate-pulse" />
             </div>
 
             {/* Overlay secondary badge */}
-            <div className="absolute -bottom-6 -right-6 p-3 rounded-[18px] bg-white/[0.05] border border-white/[0.08] backdrop-blur-lg shadow-xl flex items-center gap-2 max-w-[150px]">
-              <div className="w-6 h-6 rounded-full bg-[#DA47F9]/20 flex items-center justify-center text-[#DA47F9]">
+            <div className="absolute -bottom-6 -right-6 p-3 rounded-[18px] bg-white/80 dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-lg shadow-lg flex items-center gap-2 max-w-[150px]">
+              <div className="w-6 h-6 rounded-full bg-[#0071E3]/10 dark:bg-[#0A84FF]/10 flex items-center justify-center text-[#0071E3] dark:text-[#0A84FF]">
                 <Activity size={12} />
               </div>
               <div>
-                <h5 className="text-[9px] font-bold text-white">Attendance</h5>
-                <p className="text-[10px] font-black text-gray-200">94.8% Pres.</p>
+                <h5 className="text-[9px] font-bold text-gray-900 dark:text-white">Attendance</h5>
+                <p className="text-[10px] font-black text-[#0071E3] dark:text-[#0A84FF]">94.8% Pres.</p>
               </div>
             </div>
           </div>
 
           <div className="mt-12 text-center max-w-[360px]">
-            <h2 className="text-[20px] font-extrabold text-white leading-snug">
+            <h2 className="text-[20px] font-extrabold text-gray-900 dark:text-white leading-snug">
               Elevate Academic Management
             </h2>
-            <p className="mt-2 text-[12px] text-gray-400 leading-relaxed">
+            <p className="mt-2 text-[12px] text-gray-500 dark:text-gray-400 leading-relaxed">
               Experience the next-generation portal packed with real-time academic stats, dynamic course rosters, and AI-powered insights.
             </p>
           </div>
         </div>
 
         {/* Brand footer quote */}
-        <div className="relative text-[11px] text-gray-500 italic z-10">
+        <div className="relative text-[11px] text-gray-400 dark:text-gray-600 italic z-10">
           "Education is the passport to the future." — IIIT Una
         </div>
       </div>
@@ -149,8 +149,8 @@ export default function LoginPage() {
       {/* RIGHT PANEL: Login Form Panel */}
       <div className="w-full md:w-1/2 flex flex-col justify-between p-6 md:p-12 relative items-center justify-center">
         {/* Glow ambient background circles for Right Panel */}
-        <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] rounded-full bg-[#6C87FB]/[0.05] dark:bg-[#6C87FB]/[0.03] blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-[20%] left-[10%] w-[300px] h-[300px] rounded-full bg-[#DA47F9]/[0.05] dark:bg-[#DA47F9]/[0.03] blur-[100px] pointer-events-none" />
+        <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] rounded-full bg-[#0071E3]/[0.04] dark:bg-[#0A84FF]/[0.02] blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[20%] left-[10%] w-[300px] h-[300px] rounded-full bg-purple-500/[0.04] dark:bg-purple-500/[0.02] blur-[100px] pointer-events-none" />
 
         {/* Theme toggle */}
         <div className="w-full flex justify-end z-20">
@@ -166,13 +166,13 @@ export default function LoginPage() {
         <div className="w-full max-w-[400px] my-auto z-10">
           <div className="flex flex-col mb-7 text-center md:text-left md:items-start items-center">
             {/* Logo for mobile view */}
-            <div className="md:hidden w-12 h-12 rounded-[16px] bg-gradient-to-br from-[#6C87FB] to-[#DA47F9] flex items-center justify-center shadow-lg shadow-[#6C87FB]/25 mb-4">
+            <div className="md:hidden w-12 h-12 rounded-[16px] bg-[#0071E3] dark:bg-[#0A84FF] flex items-center justify-center shadow-lg shadow-[#0071E3]/20 dark:shadow-[#0A84FF]/20 mb-4">
               <GraduationCap size={22} className="text-white" />
             </div>
             <h1 className="text-[26px] font-black text-gray-900 dark:text-white tracking-tight">
               Sign In
             </h1>
-            <p className="mt-1.5 text-[13px] text-gray-400 dark:text-gray-500 font-medium">
+            <p className="mt-1.5 text-[13px] text-gray-500 dark:text-gray-400 font-medium">
               Enter credentials below to access your institutional dashboard.
             </p>
           </div>
@@ -180,7 +180,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email input field */}
             <div className="space-y-1.5">
-              <label className="text-[12.5px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+              <label className="text-[12px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                 Email address
               </label>
               <div className="relative">
@@ -196,13 +196,13 @@ export default function LoginPage() {
                   placeholder="you@iiitu.ac.in"
                   className={cn(
                     'w-full h-12 pl-11 pr-4 text-sm rounded-2xl',
-                    'bg-[#F2F3F6] dark:bg-[#141416]',
+                    'bg-[#EBEBEF] dark:bg-[#1C1C1E]',
                     'border border-black/[0.04] dark:border-white/[0.05]',
                     'text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600',
-                    'outline-none transition-all duration-150',
-                    'focus:bg-white dark:focus:bg-[#1A1A1E]',
-                    'focus:border-[#6C87FB]/60 dark:focus:border-[#6C87FB]/60',
-                    'focus:ring-4 focus:ring-[#6C87FB]/10 dark:focus:ring-[#6C87FB]/10',
+                    'outline-none transition-all duration-155',
+                    'focus:bg-white dark:focus:bg-[#252528]',
+                    'focus:border-[#0071E3]/60 dark:focus:border-[#0A84FF]/60',
+                    'focus:ring-4 focus:ring-[#0071E3]/10 dark:focus:ring-[#0A84FF]/10',
                     error && 'border-red-400 dark:border-red-500'
                   )}
                 />
@@ -211,7 +211,7 @@ export default function LoginPage() {
 
             {/* Password input field */}
             <div className="space-y-1.5">
-              <label className="text-[12.5px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+              <label className="text-[12px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                 Password
               </label>
               <div className="relative">
@@ -226,13 +226,13 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   className={cn(
                     'w-full h-12 pl-11 pr-11 text-sm rounded-2xl',
-                    'bg-[#F2F3F6] dark:bg-[#141416]',
+                    'bg-[#EBEBEF] dark:bg-[#1C1C1E]',
                     'border border-black/[0.04] dark:border-white/[0.05]',
                     'text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600',
-                    'outline-none transition-all duration-150',
-                    'focus:bg-white dark:focus:bg-[#1A1A1E]',
-                    'focus:border-[#6C87FB]/60 dark:focus:border-[#6C87FB]/60',
-                    'focus:ring-4 focus:ring-[#6C87FB]/10 dark:focus:ring-[#6C87FB]/10',
+                    'outline-none transition-all duration-155',
+                    'focus:bg-white dark:focus:bg-[#252528]',
+                    'focus:border-[#0071E3]/60 dark:focus:border-[#0A84FF]/60',
+                    'focus:ring-4 focus:ring-[#0071E3]/10 dark:focus:ring-[#0A84FF]/10',
                     error && 'border-red-400 dark:border-red-500'
                   )}
                 />
@@ -259,13 +259,13 @@ export default function LoginPage() {
               disabled={loading}
               className={cn(
                 'w-full h-12 mt-2 flex items-center justify-center gap-2 rounded-2xl',
-                'bg-gradient-to-r from-[#6C87FB] to-[#DA47F9]',
-                'hover:opacity-95 active:opacity-100',
+                'bg-[#0071E3] hover:bg-[#0077ED] active:bg-[#006AD6]',
+                'dark:bg-[#0A84FF] dark:hover:bg-[#409CFF] dark:active:bg-[#0072E3]',
                 'text-white text-[15px] font-bold',
                 'transition-all duration-150',
-                'shadow-lg shadow-[#6C87FB]/20',
+                'shadow-lg shadow-[#0071E3]/15 dark:shadow-[#0A84FF]/15',
                 'disabled:opacity-50 disabled:cursor-not-allowed',
-                'focus:outline-none focus:ring-4 focus:ring-[#6C87FB]/20'
+                'focus:outline-none focus:ring-4 focus:ring-[#0071E3]/20 dark:focus:ring-[#0A84FF]/20'
               )}
             >
               {loading ? (
@@ -282,7 +282,7 @@ export default function LoginPage() {
           {/* Quick Debugging / Testing accounts shortcut pills */}
           <div className="mt-8 pt-6 border-t border-black/[0.05] dark:border-white/[0.05]">
             <div className="flex items-center gap-1.5 justify-center md:justify-start mb-2.5">
-              <Sparkles size={13} className="text-[#DA47F9]" />
+              <Sparkles size={13} className="text-[#0071E3] dark:text-[#0A84FF]" />
               <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                 Instant Mock Login
               </span>
@@ -292,7 +292,7 @@ export default function LoginPage() {
                 <button
                   key={role}
                   onClick={() => handleShortcutLogin(role)}
-                  className="text-[11px] font-bold px-3 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.04] text-gray-500 dark:text-gray-400 hover:bg-black/[0.06] dark:hover:bg-white/[0.08] border border-black/[0.02] dark:border-white/[0.02] transition-all capitalize"
+                  className="text-[11px] font-bold px-3 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.04] text-gray-500 dark:text-gray-400 hover:text-[#0071E3] dark:hover:text-[#0A84FF] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] border border-black/[0.02] dark:border-white/[0.02] transition-all capitalize"
                 >
                   {role}
                 </button>
